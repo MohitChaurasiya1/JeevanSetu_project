@@ -1,0 +1,2 @@
+class MLEngineException(Exception):
+    pass

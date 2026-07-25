@@ -1,0 +1,39 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.sqlite3
+.pytest_cache/
+.coverage
+
+# Node.js
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Media & Static files
+backend/media/*
+!backend/media/.gitkeep
+backend/staticfiles/*
+!backend/static/.gitkeep
+
+# Machine Learning Models & Data
+machine_learning/models/*
+!machine_learning/models/.gitkeep
+*.pkl
+*.joblib
+.ipynb_checkpoints/
+
+# System & IDE
+.DS_Store
+.vscode/
+.idea/

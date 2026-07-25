@@ -1,0 +1,6 @@
+export const RISK_LEVELS = {
+  LOW: 'LOW',
+  MODERATE: 'MODERATE',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL',
+};
