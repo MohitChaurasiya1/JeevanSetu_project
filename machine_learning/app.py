@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 
 # Model load karo
-with open('model.pkl', 'rb') as file:
+with open('models/model.pkl', 'rb') as file:
     model = pickle.load(file)
 
 st.title("JeevanSetu - Disease Prediction System")
