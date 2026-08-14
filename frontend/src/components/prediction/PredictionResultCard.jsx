@@ -1,10 +1,12 @@
 import React from 'react';
+import RiskIndicator from './RiskIndicator';
 
-const PredictionResultCard = () => {
+const PredictionResultCard = ({ result }) => {
+  if (!result) return null;
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-      <h3 className="text-lg font-semibold text-primary">PredictionResultCard</h3>
-      <p className="text-sm text-gray-500">Starter boilerplate component</p>
+    <div className="mt-4 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+      <h3 className="text-lg font-semibold mb-2">Prediction Result</h3>
+      <RiskIndicator prediction={result.prediction} />
     </div>
   );
 };
