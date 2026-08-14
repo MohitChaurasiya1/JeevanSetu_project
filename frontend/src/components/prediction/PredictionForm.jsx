@@ -20,7 +20,7 @@ const PredictionForm = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post("http://127.0.0.1:8000/predict", formData);
+      const response = await axios.post("https://jeevansetu-project.onrender.com/predict", formData);
       setResult(response.data);
     } catch (error) {
       setResult({ risk: "Error: backend se connect nahi ho paya", prediction: null });
