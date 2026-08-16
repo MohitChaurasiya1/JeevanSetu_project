@@ -1,10 +1,22 @@
+import os
+from pathlib import Path
+
 import streamlit as st
 import pickle
 import numpy as np
 
 # Model load karo
-with open('models/model.pkl', 'rb') as file:
-    model = pickle.load(file)
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = BASE_DIR / 'models' / 'model.pkl'
+model = None
+try:
+    with open(MODEL_PATH, 'rb') as file:
+        model = pickle.load(file)
+except Exception as e:
+    # Defer a helpful message to the Streamlit UI instead of crashing at import time
+    model = None
+    # If Streamlit isn't running yet, printing helps debugging in logs
+    print(f"Could not load model from {MODEL_PATH}: {e}")
 
 st.title("JeevanSetu - Disease Prediction System")
 st.write("Apni health details daal ke diabetes risk check karo")
@@ -20,10 +32,13 @@ dpf = st.number_input("Diabetes Pedigree Function", min_value=0.0, max_value=3.0
 age = st.number_input("Age", min_value=1, max_value=120, value=30)
 
 if st.button("Predict"):
-    input_data = np.array([[pregnancies, glucose, blood_pressure, skin_thickness, insulin, bmi, dpf, age]])
-    prediction = model.predict(input_data)
-    
-    if prediction[0] == 1:
-        st.error("High Risk of Diabetes")
+    if model is None:
+        st.error("Model not loaded. Please ensure 'models/model.pkl' exists and is a valid pickle file.")
     else:
-        st.success("Low Risk of Diabetes")
+        input_data = np.array([[pregnancies, glucose, blood_pressure, skin_thickness, insulin, bmi, dpf, age]])
+        prediction = model.predict(input_data)
+
+        if prediction[0] == 1:
+            st.error("High Risk of Diabetes")
+        else:
+            st.success("Low Risk of Diabetes")

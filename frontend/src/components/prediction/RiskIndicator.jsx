@@ -1,10 +1,13 @@
 import React from 'react';
 
-const RiskIndicator = () => {
+const RiskIndicator = ({ prediction }) => {
+  const isHighRisk = prediction === 1;
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-      <h3 className="text-lg font-semibold text-primary">RiskIndicator</h3>
-      <p className="text-sm text-gray-500">Starter boilerplate component</p>
+    <div className={`p-3 rounded-lg text-center font-semibold ${
+      isHighRisk ? "bg-red-100 text-red-700 border border-red-300"
+                  : "bg-green-100 text-green-700 border border-green-300"
+    }`}>
+      {isHighRisk ? "⚠ High Risk of Diabetes" : "✅ Low Risk of Diabetes"}
     </div>
   );
 };
