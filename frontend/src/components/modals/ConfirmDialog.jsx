@@ -1,11 +1,47 @@
 import React from 'react';
+import Modal from '../common/Modal';
+import Button from '../common/Button';
 
-const ConfirmDialog = () => {
+const ConfirmDialog = ({
+  open = false,
+  onClose,
+  onConfirm,
+  title = 'Are you sure?',
+  message = 'This action cannot be undone.',
+  confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
+  variant = 'danger',
+  loading = false,
+}) => {
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-      <h3 className="text-lg font-semibold text-primary">ConfirmDialog</h3>
-      <p className="text-sm text-gray-500">Starter boilerplate component</p>
-    </div>
+    <Modal
+      open={open}
+      onClose={loading ? undefined : onClose}
+      title={title}
+      maxWidth="max-w-md"
+      footer={
+        <>
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            disabled={loading}
+          >
+            {cancelLabel}
+          </Button>
+          <Button
+            variant={variant}
+            onClick={onConfirm}
+            loading={loading}
+          >
+            {confirmLabel}
+          </Button>
+        </>
+      }
+    >
+      <p className="text-sm text-text-secondary leading-relaxed">
+        {message}
+      </p>
+    </Modal>
   );
 };
 

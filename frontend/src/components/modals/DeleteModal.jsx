@@ -1,11 +1,24 @@
 import React from 'react';
+import ConfirmDialog from './ConfirmDialog';
 
-const DeleteModal = () => {
+const DeleteModal = ({
+  open = false,
+  onClose,
+  onDelete,
+  itemName = 'item',
+  loading = false,
+}) => {
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-      <h3 className="text-lg font-semibold text-primary">DeleteModal</h3>
-      <p className="text-sm text-gray-500">Starter boilerplate component</p>
-    </div>
+    <ConfirmDialog
+      open={open}
+      onClose={onClose}
+      onConfirm={onDelete}
+      title={`Delete ${itemName}`}
+      message={`Are you sure you want to delete this ${itemName}? This action cannot be reversed.`}
+      confirmLabel="Delete"
+      variant="danger"
+      loading={loading}
+    />
   );
 };
 

@@ -1,11 +1,29 @@
 import React from 'react';
 
-const Badge = () => {
+const Badge = ({
+  variant = 'info',
+  children,
+  className = '',
+  icon = null,
+  ...props
+}) => {
+  const variantClasses = {
+    success: 'badge-success',
+    warning: 'badge-warning',
+    danger: 'badge-danger',
+    info: 'badge-info',
+    low: 'badge-risk-low',
+    medium: 'badge-risk-medium',
+    high: 'badge-risk-high',
+  };
+
+  const selectedVariant = variantClasses[variant] || variantClasses.info;
+
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-      <h3 className="text-lg font-semibold text-primary">Badge</h3>
-      <p className="text-sm text-gray-500">Starter boilerplate component</p>
-    </div>
+    <span className={`${selectedVariant} ${className}`} {...props}>
+      {icon && <span className="inline-flex items-center text-xs">{icon}</span>}
+      {children}
+    </span>
   );
 };
 

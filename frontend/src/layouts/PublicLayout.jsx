@@ -1,10 +1,12 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import Navbar from '../components/navigation/Navbar';
 
 const PublicLayout = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <main className="flex-1 p-6">
+      <Navbar />
+      <main className="flex-1">
         <Outlet />
       </main>
     </div>
