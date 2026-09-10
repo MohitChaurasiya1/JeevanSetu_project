@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
   DISEASES: '/diseases/',
   SYMPTOMS: '/symptoms/',
   PREDICTIONS: '/predictions/',
+  PREDICT: '/predictions/predict/',
   FEEDBACK: '/feedback/',
   ADMIN: '/admin-panel/',
 };

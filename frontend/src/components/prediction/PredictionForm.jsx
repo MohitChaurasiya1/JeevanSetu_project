@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import BasicInfoSection from './BasicInfoSection';
 import MedicalInfoSection from './MedicalInfoSection';
 import PredictionResultCard from './PredictionResultCard';
+import predictionApi from '../../api/predictionApi';
 
 const PredictionForm = () => {
   const [formData, setFormData] = useState({
-    pregnancies: 0, glucose: 100, blood_pressure: 70,
-    skin_thickness: 20, insulin: 80, bmi: 25, dpf: 0.5, age: 30,
+    pregnancies: 0,
+    glucose: 100,
+    blood_pressure: 70,
+    skin_thickness: 20,
+    insulin: 80,
+    bmi: 25,
+    dpf: 0.5,
+    age: 30,
   });
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: Number(e.target.value) });
@@ -20,13 +26,22 @@ const PredictionForm = () => {
     e.preventDefault();
     setLoading(true);
     setResult(null);
+    setErrorMessage('');
+
     try {
-      const response = await axios.post("https://jeevansetu-project.onrender.com/predict", formData);
-      setResult(response.data);
+      const data = await predictionApi.predict(formData);
+      setResult(data);
     } catch (error) {
-      setResult({ risk: "Backend se connect nahi ho paya. Please try again.", prediction: null });
+      console.error('Prediction request failed:', error);
+      const serverMsg = error.response?.data?.error ||
+        (typeof error.response?.data === 'object' ? Object.values(error.response.data)[0] : null);
+
+      setErrorMessage(
+        serverMsg || 'Unable to connect to the prediction service. Please ensure the backend is running and try again.'
+      );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -61,7 +76,6 @@ const PredictionForm = () => {
       {/* Form Card */}
       <div style={{ maxWidth: '680px', margin: '0 auto' }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <BasicInfoSection formData={formData} onChange={handleChange} />
           <MedicalInfoSection formData={formData} onChange={handleChange} />
 
           {/* Submit Button */}
@@ -97,6 +111,13 @@ const PredictionForm = () => {
             ) : '🔬 Run Prediction'}
           </button>
         </form>
+
+        {/* Error message */}
+        {errorMessage && (
+          <div className="mt-4 p-4 rounded-xl bg-red-900/40 border border-red-500/50 text-red-200 text-sm text-center">
+            {errorMessage}
+          </div>
+        )}
 
         {/* Result */}
         {result && <div style={{ marginTop: '1.5rem' }}><PredictionResultCard result={result} /></div>}
