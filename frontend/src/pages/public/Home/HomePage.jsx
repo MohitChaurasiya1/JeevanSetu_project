@@ -225,43 +225,43 @@ const HomePage = () => {
       </section>
 
       {/* 4. HEALTHCARE / PREDICTION INFORMATION SECTION */}
-      <section className="section-container border-b border-border">
+      <section className="section-container border-b border-border" aria-labelledby="healthcare-info-heading">
         <div className="page-container">
           <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl sm:text-h2 font-bold text-text mb-3">
-                Make Better Health Decisions
-              </h2>
-              <p className="text-sm sm:text-body text-text-secondary leading-relaxed">
-                JeevanSetu provides an initial disease-risk assessment based on
-                the symptoms you provide. It is designed to help users understand
-                potential risks and explore relevant health information.
-              </p>
-            </div>
+            <Card className="p-6 sm:p-8 bg-white border border-border rounded-xl shadow-card">
+              <div className="text-center mb-6">
+                <h2 id="healthcare-info-heading" className="text-2xl sm:text-h2 font-bold text-text mb-3">
+                  Make Better Health Decisions
+                </h2>
+                <p className="text-sm sm:text-body text-text-secondary leading-relaxed max-w-2xl mx-auto">
+                  JeevanSetu provides an initial disease-risk assessment based on the symptoms you provide. It is designed to help users understand potential risks and explore relevant health information.
+                </p>
+              </div>
 
-            {/* Medical Disclaimer Alert */}
-            <Alert
-              variant="info"
-              title="Important"
-              message="JeevanSetu is an informational prediction tool and should not replace professional medical diagnosis or treatment."
-              className="bg-white"
-            />
+              {/* Medical Disclaimer Alert */}
+              <Alert
+                variant="warning"
+                title="Important"
+                message="JeevanSetu is an informational prediction tool and should not replace professional medical diagnosis or treatment."
+                className="bg-amber-50/60 border-amber-200"
+              />
+            </Card>
           </div>
         </div>
       </section>
 
       {/* 5. CALL TO ACTION SECTION */}
-      <section className="section-container bg-white">
+      <section className="section-container bg-white" aria-labelledby="cta-heading">
         <div className="page-container">
-          <div className="card-base bg-background p-8 sm:p-12 text-center max-w-3xl mx-auto border border-border">
-            <h2 className="text-2xl sm:text-h2 font-bold text-text mb-3">
+          <div className="card-base bg-background p-8 sm:p-12 text-center max-w-3xl mx-auto border border-border shadow-card">
+            <h2 id="cta-heading" className="text-2xl sm:text-h2 font-bold text-text mb-3">
               Ready to Understand Your Health Risks?
             </h2>
-            <p className="text-sm sm:text-body text-text-secondary mb-6 max-w-xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-body text-text-secondary mb-7 max-w-xl mx-auto leading-relaxed">
               Start a symptom-based assessment with JeevanSetu.
             </p>
             <div className="flex justify-center">
-              <Link to={ROUTES.NEW_PREDICTION}>
+              <Link to={ROUTES.NEW_PREDICTION} tabIndex={-1}>
                 <Button variant="primary" className="px-8 py-3 text-base">
                   Check Your Risk
                   <FaArrowRight className="ml-2 w-3.5 h-3.5" aria-hidden="true" />
