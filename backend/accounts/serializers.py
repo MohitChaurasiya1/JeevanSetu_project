@@ -1,8 +1,79 @@
 from rest_framework import serializers
+
 from .models import User
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'full_name', 'email', 'phone', 'gender', 'date_of_birth', 'role', 'is_email_verified', 'is_active', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        fields = [
+            'id',
+            'username',
+            'full_name',
+            'email',
+            'phone',
+            'gender',
+            'date_of_birth',
+            'role',
+            'is_email_verified',
+            'is_active',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = [
+            'id',
+            'role',
+            'is_email_verified',
+            'is_active',
+            'created_at',
+            'updated_at',
+        ]
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True,
+        min_length=8
+    )
+    password_confirm = serializers.CharField(
+        write_only=True
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'full_name',
+            'email',
+            'phone',
+            'gender',
+            'date_of_birth',
+            'password',
+            'password_confirm',
+        ]
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                "A user with this email already exists."
+            )
+        return value
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password_confirm']:
+            raise serializers.ValidationError({
+                'password_confirm': 'Passwords do not match.'
+            })
+
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop('password_confirm')
+
+        password = validated_data.pop('password')
+
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+
+        return user

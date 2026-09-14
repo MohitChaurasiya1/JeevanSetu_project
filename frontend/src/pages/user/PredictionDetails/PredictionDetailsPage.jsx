@@ -1,12 +1,178 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import predictionApi from '../../../api/predictionApi';
 
 const PredictionDetailsPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [prediction, setPrediction] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    const loadPrediction = async () => {
+      try {
+        setLoading(true);
+        setErrorMessage('');
+
+        const data = await predictionApi.getById(id);
+
+        setPrediction(data);
+      } catch (error) {
+        console.error('Failed to load prediction details:', error);
+
+        const serverMsg =
+          error.response?.data?.detail ||
+          error.response?.data?.error;
+
+        setErrorMessage(
+          serverMsg || 'Unable to load prediction details.'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPrediction();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="p-6 bg-white rounded-xl shadow-card border border-border text-center">
+          <p className="text-textSecondary">
+            Loading prediction details...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <div className="container mx-auto p-6">
+        <button
+          onClick={() => navigate('/predictions')}
+          className="mb-4 text-sm text-primary hover:underline"
+        >
+          ← Back to Prediction History
+        </button>
+
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600">
+          {errorMessage}
+        </div>
+      </div>
+    );
+  }
+
+  if (!prediction) {
+    return null;
+  }
+
+  const probability =
+    prediction.probability !== undefined &&
+      prediction.probability !== null
+      ? `${(prediction.probability * 100).toFixed(1)}%`
+      : 'N/A';
+
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold text-primary mb-4">Prediction Details</h1>
-      <p className="text-textSecondary">
-        Starter component page for Prediction Details. Route ready for development.
-      </p>
+      <button
+        onClick={() => navigate('/predictions')}
+        className="mb-6 text-sm text-primary hover:underline"
+      >
+        ← Back to Prediction History
+      </button>
+
+      <h1 className="text-2xl font-bold text-primary mb-6">
+        Prediction Details
+      </h1>
+
+      <div className="bg-white rounded-xl shadow-card border border-border p-6">
+        <div className="flex items-center justify-between pb-4 mb-5 border-b border-border">
+          <h2 className="text-lg font-semibold text-text">
+            Prediction #{prediction.id}
+          </h2>
+
+          <span className="text-sm text-textSecondary">
+            {prediction.created_at
+              ? new Date(prediction.created_at).toLocaleDateString()
+              : 'Date unavailable'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div>
+            <p className="text-xs text-textSecondary mb-1">
+              Result
+            </p>
+            <p className="font-medium text-text">
+              {prediction.prediction_result || 'N/A'}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs text-textSecondary mb-1">
+              Risk Level
+            </p>
+            <p className="font-medium text-text">
+              {prediction.risk_level || 'N/A'}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xs text-textSecondary mb-1">
+              Probability
+            </p>
+            <p className="font-medium text-text">
+              {probability}
+            </p>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="text-base font-semibold text-text mb-4">
+            Assessment Input
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {prediction.input_data &&
+              Object.entries(prediction.input_data).map(
+                ([key, value]) => (
+                  <div
+                    key={key}
+                    className="p-4 bg-slate-50 rounded-lg border border-border"
+                  >
+                    <p className="text-xs text-textSecondary mb-1">
+                      {key}
+                    </p>
+
+                    <p className="font-medium text-text">
+                      {value}
+                    </p>
+                  </div>
+                )
+              )}
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs text-textSecondary mb-1">
+            Model Version
+          </p>
+
+          <p className="font-medium text-text">
+            {prediction.model_version || 'N/A'}
+          </p>
+        </div>
+
+        <p className="mt-6 pt-4 border-t border-border text-xs text-text-muted leading-relaxed">
+          This assessment is generated by machine learning for
+          informational purposes and does not replace professional
+          medical advice.
+        </p>
+      </div>
     </div>
   );
 };
