@@ -24,7 +24,7 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white border-b border-border">
+    <header className="sticky top-0 z-40 w-full bg-green-100 border-b border-border">
       <nav aria-label="Main Navigation" className="page-container">
         <div className="flex items-center justify-between h-16 md:h-18">
           {/* Brand / Logo */}
@@ -50,10 +50,9 @@ const Navbar = () => {
                 to={link.path}
                 end={link.path === ROUTES.HOME}
                 className={({ isActive }) =>
-                  `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'text-primary bg-primary-light/30'
-                      : 'text-text-secondary hover:text-primary hover:bg-slate-50'
+                  `px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive
+                    ? 'text-primary bg-primary-light/30'
+                    : 'text-text-secondary hover:text-primary hover:bg-slate-50'
                   }`
                 }
               >
@@ -109,10 +108,9 @@ const Navbar = () => {
                   end={link.path === ROUTES.HOME}
                   onClick={closeMobileMenu}
                   className={({ isActive }) =>
-                    `px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
-                      isActive
-                        ? 'text-primary bg-primary-light/40 font-semibold'
-                        : 'text-text-secondary hover:text-primary hover:bg-slate-50'
+                    `px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${isActive
+                      ? 'text-primary bg-primary-light/40 font-semibold'
+                      : 'text-text-secondary hover:text-primary hover:bg-slate-50'
                     }`
                   }
                 >
