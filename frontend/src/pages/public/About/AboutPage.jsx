@@ -33,24 +33,24 @@ const AboutPage = () => {
   // Placeholder data for collaborative project presentation - easy to update
   const teamMembers = [
     {
-      name: "TEAM_MEMBER_1_NAME",
-      role: "TEAM_MEMBER_1_ROLE",
-      contribution: "TEAM_MEMBER_1_CONTRIBUTION",
+      name: "ABHISHEK YADAV",
+      role: "TEAM LEADER",
+      contribution: "-BACKEND-DEVELOPER",
     },
     {
-      name: "TEAM_MEMBER_2_NAME",
-      role: "TEAM_MEMBER_2_ROLE",
-      contribution: "TEAM_MEMBER_2_CONTRIBUTION",
+      name: "MOHIT CHAUASIYA",
+      role: "TEAM MEMBER",
+      contribution: "-FRONTEND-DEVELOPER\n-OVERALL-TESTING",
     },
     {
-      name: "TEAM_MEMBER_3_NAME",
-      role: "TEAM_MEMBER_3_ROLE",
-      contribution: "TEAM_MEMBER_3_CONTRIBUTION",
+      name: "TUSHAR RAWAT",
+      role: "TEAM MEMBER",
+      contribution: "-AI-MODEL-DEVELOPER",
     },
     {
-      name: "TEAM_MEMBER_4_NAME",
-      role: "TEAM_MEMBER_4_ROLE",
-      contribution: "TEAM_MEMBER_4_CONTRIBUTION",
+      name: "SATYA PRAKASH YADAV",
+      role: "TEAM MEMBER",
+      contribution: "-DATA COLLECTOR AND DATA VISUALIZATION",
     },
   ];
 
@@ -156,7 +156,7 @@ const AboutPage = () => {
                     <span className="text-xs font-medium text-text-muted block mb-1">
                       Contribution:
                     </span>
-                    <p className="text-xs text-text-secondary leading-relaxed">
+                    <p className="text-xs text-text-secondary leading-relaxed whitespace-pre-line">
                       {member.contribution}
                     </p>
                   </div>
