@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fa';
 import { ROUTES } from '../../../constants/routes';
 import { Button, Card, Alert, Badge } from '../../../components/common';
+import HeroMedicalVisual from '../../../components/hologram/HeroMedicalVisual';
 
 const HomePage = () => {
   const features = [
@@ -97,11 +98,11 @@ const HomePage = () => {
                 <Link to={ROUTES.NEW_PREDICTION} tabIndex={-1}>
                   <Button
                     variant="primary"
-                    className="w-full sm:w-auto px-6 py-3"
+                    className="w-full sm:w-auto px-6 py-3 group transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/25"
                   >
                     Check Your Risk
                     <FaArrowRight
-                      className="ml-2 w-3.5 h-3.5"
+                      className="ml-2 w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1.5"
                       aria-hidden="true"
                     />
                   </Button>
@@ -110,7 +111,7 @@ const HomePage = () => {
                 <Link to={ROUTES.DISEASES} tabIndex={-1}>
                   <Button
                     variant="outline"
-                    className="w-full sm:w-auto px-6 py-3"
+                    className="w-full sm:w-auto px-6 py-3 transition-all duration-200 hover:border-primary hover:bg-primary/5 hover:-translate-y-0.5"
                   >
                     Explore Diseases
                   </Button>
@@ -118,15 +119,9 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* Hero Right Visual - New Healthcare Image */}
+            {/* Hero Right Visual - Medical Anatomy Visualization with subtle animations */}
             <div className="w-full flex justify-center lg:justify-end">
-              <div className="w-full max-w-2xl overflow-hidden">
-                <img
-                  src="/hero-page.jpeg"
-                  alt="JeevanSetu AI Healthcare Prediction"
-                  className="w-full h-auto object-contain"
-                />
-              </div>
+              <HeroMedicalVisual />
             </div>
 
           </div>

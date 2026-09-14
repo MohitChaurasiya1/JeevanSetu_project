@@ -31,7 +31,7 @@ const Navbar = () => {
           <Link
             to={ROUTES.HOME}
             onClick={closeMobileMenu}
-            className="flex items-center gap-2.5 text-primary hover:opacity-90 transition-opacity focus-visible:outline-primary"
+            className="flex items-center gap-2.5 text-primary hover:opacity-90 hover:scale-105 transition-all duration-200 focus-visible:outline-primary"
             aria-label="JeevanSetu Home"
           >
             <img
@@ -53,9 +53,9 @@ const Navbar = () => {
                 to={link.path}
                 end={link.path === ROUTES.HOME}
                 className={({ isActive }) =>
-                  `px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive
-                    ? 'text-primary bg-primary-light/30'
-                    : 'text-text-secondary hover:text-primary hover:bg-slate-50'
+                  `px-3 py-2 rounded-md text-sm font-medium nav-link-animated transition-colors duration-200 ${isActive
+                    ? 'text-primary bg-primary-light/30 font-semibold'
+                    : 'text-text-secondary hover:text-primary'
                   }`
                 }
               >
@@ -69,7 +69,7 @@ const Navbar = () => {
             <Link to={ROUTES.LOGIN} tabIndex={-1}>
               <Button
                 variant="outline"
-                className="text-xs lg:text-sm px-3.5 py-1.5"
+                className="text-xs lg:text-sm px-3.5 py-1.5 transition-colors duration-200 hover:border-primary hover:text-primary"
               >
                 Login
               </Button>
@@ -78,7 +78,7 @@ const Navbar = () => {
             <Link to={ROUTES.REGISTER} tabIndex={-1}>
               <Button
                 variant="primary"
-                className="text-xs lg:text-sm px-3.5 py-1.5"
+                className="text-xs lg:text-sm px-3.5 py-1.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               >
                 Register
               </Button>

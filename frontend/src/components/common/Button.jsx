@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const Button = ({
   children,
@@ -11,6 +11,8 @@ const Button = ({
   onClick,
   ...props
 }) => {
+  const [ripples, setRipples] = useState([]);
+
   const variantClasses = {
     primary: 'btn-primary',
     secondary: 'btn-secondary',
@@ -21,14 +23,52 @@ const Button = ({
 
   const selectedVariant = variantClasses[variant] || variantClasses.primary;
 
+  const handleClick = (e) => {
+    if (disabled || loading) return;
+
+    try {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      const id = Date.now() + Math.random();
+
+      setRipples((prev) => [...prev.slice(-2), { x, y, size, id }]);
+      setTimeout(() => {
+        setRipples((prev) => prev.filter((r) => r.id !== id));
+      }, 600);
+    } catch {
+      // Fallback gracefully
+    }
+
+    if (onClick) {
+      onClick(e);
+    }
+  };
+
   return (
     <button
       type={type}
       disabled={disabled || loading}
-      onClick={onClick}
-      className={`${selectedVariant} ${className}`}
+      onClick={handleClick}
+      className={`btn-ripple-container ${selectedVariant} ${className}`}
       {...props}
     >
+      {/* Ripple Animation Spans */}
+      {ripples.map((ripple) => (
+        <span
+          key={ripple.id}
+          className="btn-ripple-effect"
+          style={{
+            top: ripple.y,
+            left: ripple.x,
+            width: ripple.size,
+            height: ripple.size,
+          }}
+          aria-hidden="true"
+        />
+      ))}
+
       {loading ? (
         <>
           <svg
