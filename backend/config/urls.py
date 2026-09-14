@@ -10,6 +10,7 @@ urlpatterns = [
     path('api/symptoms/', include('diseases.symptom_urls')),
     path('api/predictions/', include('predictions.urls')),
     path('api/feedback/', include('feedback.urls')),
+    path('api/contact/', include('feedback.contact_urls')),
     path('api/admin-panel/', include('admin_panel.urls')),
     path('api/audit-logs/', include('audit_logs.urls')),
     path('api/ml-models/', include('ml_models.urls')),

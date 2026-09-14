@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { HiMenu, HiX } from 'react-icons/hi';
-import { FaHeartbeat } from 'react-icons/fa';
 import { ROUTES } from '../../constants/routes';
 import Button from '../common/Button';
 
@@ -27,6 +26,7 @@ const Navbar = () => {
     <header className="sticky top-0 z-40 w-full bg-green-100 border-b border-border">
       <nav aria-label="Main Navigation" className="page-container">
         <div className="flex items-center justify-between h-16 md:h-18">
+
           {/* Brand / Logo */}
           <Link
             to={ROUTES.HOME}
@@ -34,9 +34,12 @@ const Navbar = () => {
             className="flex items-center gap-2.5 text-primary hover:opacity-90 transition-opacity focus-visible:outline-primary"
             aria-label="JeevanSetu Home"
           >
-            <div className="w-9 h-9 rounded-lg bg-primary-light/50 flex items-center justify-center text-primary">
-              <FaHeartbeat className="w-5 h-5" aria-hidden="true" />
-            </div>
+            <img
+              src="/Logo.jpeg"
+              alt="JeevanSetu"
+              className="w-10 h-10 object-contain"
+            />
+
             <span className="text-xl font-bold tracking-tight text-text">
               Jeevan<span className="text-primary">Setu</span>
             </span>
@@ -64,12 +67,19 @@ const Navbar = () => {
           {/* Right Auth Action Buttons (Desktop) */}
           <div className="hidden md:flex items-center gap-3">
             <Link to={ROUTES.LOGIN} tabIndex={-1}>
-              <Button variant="outline" className="text-xs lg:text-sm px-3.5 py-1.5">
+              <Button
+                variant="outline"
+                className="text-xs lg:text-sm px-3.5 py-1.5"
+              >
                 Login
               </Button>
             </Link>
+
             <Link to={ROUTES.REGISTER} tabIndex={-1}>
-              <Button variant="primary" className="text-xs lg:text-sm px-3.5 py-1.5">
+              <Button
+                variant="primary"
+                className="text-xs lg:text-sm px-3.5 py-1.5"
+              >
                 Register
               </Button>
             </Link>
@@ -100,6 +110,7 @@ const Navbar = () => {
             id="mobile-navigation-menu"
             className="md:hidden border-t border-border py-4 space-y-3 bg-white"
           >
+            {/* Mobile Navigation Links */}
             <div className="flex flex-col space-y-1">
               {navLinks.map((link) => (
                 <NavLink
@@ -119,14 +130,28 @@ const Navbar = () => {
               ))}
             </div>
 
+            {/* Mobile Auth Buttons */}
             <div className="pt-3 border-t border-border flex flex-col gap-2">
-              <Link to={ROUTES.LOGIN} onClick={closeMobileMenu}>
-                <Button variant="outline" className="w-full justify-center py-2.5">
+              <Link
+                to={ROUTES.LOGIN}
+                onClick={closeMobileMenu}
+              >
+                <Button
+                  variant="outline"
+                  className="w-full justify-center py-2.5"
+                >
                   Login
                 </Button>
               </Link>
-              <Link to={ROUTES.REGISTER} onClick={closeMobileMenu}>
-                <Button variant="primary" className="w-full justify-center py-2.5">
+
+              <Link
+                to={ROUTES.REGISTER}
+                onClick={closeMobileMenu}
+              >
+                <Button
+                  variant="primary"
+                  className="w-full justify-center py-2.5"
+                >
                   Register
                 </Button>
               </Link>

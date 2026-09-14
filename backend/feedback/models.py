@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 
+
 class Feedback(models.Model):
     STATUS_CHOICES = (
         ('PENDING', 'Pending'),
@@ -8,14 +9,46 @@ class Feedback(models.Model):
         ('RESOLVED', 'Resolved'),
     )
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='feedbacks')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='feedbacks'
+    )
     subject = models.CharField(max_length=255)
     message = models.TextField()
     rating = models.IntegerField(default=5)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='PENDING'
+    )
     admin_response = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Feedback #{self.id} - {self.subject}"
+
+
+class ContactMessage(models.Model):
+    STATUS_CHOICES = (
+        ('NEW', 'New'),
+        ('READ', 'Read'),
+        ('RESOLVED', 'Resolved'),
+    )
+
+    full_name = models.CharField(max_length=150)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True)
+    message = models.TextField()
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='NEW'
+    )
+    admin_response = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Contact #{self.id} - {self.full_name}"
