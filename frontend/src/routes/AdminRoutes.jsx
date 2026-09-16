@@ -16,6 +16,8 @@ import PredictionManagementPage from '../pages/admin/Predictions/PredictionManag
 import AdminPredictionDetailsPage from '../pages/admin/Predictions/AdminPredictionDetailsPage';
 import FeedbackManagementPage from '../pages/admin/Feedback/FeedbackManagementPage';
 import FeedbackDetailsPage from '../pages/admin/Feedback/FeedbackDetailsPage';
+import ContactMessageListPage from '../pages/admin/ContactMessages/ContactMessageListPage';
+import ContactMessageDetailsPage from '../pages/admin/ContactMessages/ContactMessageDetailsPage';
 import MLModelManagementPage from '../pages/admin/MLModels/MLModelManagementPage';
 import MLModelDetailsPage from '../pages/admin/MLModels/MLModelDetailsPage';
 import MLModelUploadPage from '../pages/admin/MLModels/MLModelUploadPage';
@@ -51,6 +53,10 @@ const AdminRoutes = () => (
     {/* Feedback Management */}
     <Route path="feedback" element={<FeedbackManagementPage />} />
     <Route path="feedback/:id" element={<FeedbackDetailsPage />} />
+
+    {/* Contact Messages Management */}
+    <Route path="contact-messages" element={<ContactMessageListPage />} />
+    <Route path="contact-messages/:id" element={<ContactMessageDetailsPage />} />
 
     {/* ML Model Management */}
     <Route path="ml-models" element={<MLModelManagementPage />} />

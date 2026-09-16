@@ -1,8 +1,11 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
-from .views import ContactMessageCreateAPIView
+from .views import ContactMessageViewSet
 
+router = DefaultRouter()
+router.register(r'', ContactMessageViewSet, basename='contact-message')
 
 urlpatterns = [
-    path('', ContactMessageCreateAPIView.as_view(), name='contact-message'),
+    path('', include(router.urls)),
 ]

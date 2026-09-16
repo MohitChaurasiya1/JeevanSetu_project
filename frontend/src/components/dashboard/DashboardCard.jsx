@@ -1,128 +1,338 @@
 import React from 'react';
+import PatientSidebar from './PatientSidebar';
 
-const DashboardCard = ({
-  title,
-  value,
-  subtitle,
-  icon,
-  trend,
-  variant = 'teal',
-}) => {
-  const variants = {
-    teal: {
-      iconBg: 'bg-teal-50',
-      iconColor: 'text-teal-600',
-      glow: 'group-hover:shadow-teal-100',
-      value: 'text-slate-900',
-    },
-
-    green: {
-      iconBg: 'bg-emerald-50',
-      iconColor: 'text-emerald-600',
-      glow: 'group-hover:shadow-emerald-100',
-      value: 'text-emerald-600',
-    },
-
-    blue: {
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-      glow: 'group-hover:shadow-blue-100',
-      value: 'text-blue-600',
-    },
-
-    orange: {
-      iconBg: 'bg-orange-50',
-      iconColor: 'text-orange-600',
-      glow: 'group-hover:shadow-orange-100',
-      value: 'text-orange-600',
-    },
-  };
-
-  const style = variants[variant] || variants.teal;
-
+const Dashboard = ({ onLogout }) => {
   return (
-    <div
-      className={`
-        group relative overflow-hidden
-        rounded-2xl border border-slate-200
-        bg-white p-5
-        transition-all duration-300
-        hover:-translate-y-1
-        hover:shadow-xl
-        ${style.glow}
-      `}
-    >
-      {/* Decorative background */}
-      <div
-        className="
-          absolute -right-8 -top-8
-          h-24 w-24 rounded-full
-          bg-slate-50
-          transition-transform duration-500
-          group-hover:scale-150
-        "
-      />
+    <div className="min-h-screen bg-slate-50">
 
-      <div className="relative flex items-start justify-between">
-        {/* Left content */}
-        <div>
-          <p className="text-sm font-medium text-slate-500">
-            {title}
-          </p>
+      {/* SIDEBAR */}
+      <PatientSidebar onLogout={onLogout} />
 
-          <div className="mt-2 flex items-center gap-2">
-            <h3
-              className={`
-                text-3xl font-bold tracking-tight
-                ${style.value}
-              `}
-            >
-              {value}
-            </h3>
+      {/* MAIN CONTENT */}
+      <main className="ml-[300px] min-h-screen px-8 py-8">
 
-            {trend && (
-              <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-600">
-                {trend}
+        {/* ==========================================
+            STATS
+        ========================================== */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+
+          {/* Total Assessments */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+
+            <p className="text-[11px] text-slate-500">
+              Total Assessments
+            </p>
+
+            <div className="mt-1 flex items-end justify-between">
+
+              <h2 className="text-2xl font-bold text-teal-700">
+                3
+              </h2>
+
+              <span className="text-[10px] text-slate-400">
+                Completed
               </span>
-            )}
+
+            </div>
+
           </div>
 
-          {subtitle && (
-            <p className="mt-2 text-xs text-slate-400">
-              {subtitle}
+
+          {/* Latest Risk */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+
+            <p className="text-[11px] text-slate-500">
+              Latest Risk Level
             </p>
-          )}
+
+            <div className="mt-1 flex items-end justify-between">
+
+              <h2 className="text-2xl font-bold text-slate-900">
+                LOW
+              </h2>
+
+              <span className="text-[10px] text-slate-400">
+                Latest
+              </span>
+
+            </div>
+
+          </div>
+
+
+          {/* Probability */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+
+            <p className="text-[11px] text-slate-500">
+              Latest Probability
+            </p>
+
+            <div className="mt-1 flex items-end justify-between">
+
+              <h2 className="text-2xl font-bold text-slate-900">
+                12.0%
+              </h2>
+
+              <span className="text-[10px] text-slate-400">
+                Latest
+              </span>
+
+            </div>
+
+          </div>
+
         </div>
 
-        {/* Icon */}
-        <div
-          className={`
-            flex h-12 w-12 items-center justify-center
-            rounded-xl
-            ${style.iconBg}
-            ${style.iconColor}
-            transition-transform duration-300
-            group-hover:scale-110
-          `}
-        >
-          <span className="text-xl">
-            {icon}
-          </span>
-        </div>
-      </div>
 
-      {/* Bottom accent */}
-      <div
-        className="
-          absolute bottom-0 left-0
-          h-1 w-0
-          bg-teal-500
-          transition-all duration-300
-          group-hover:w-full
-        "
-      />
+        {/* ==========================================
+            RECENT ASSESSMENTS
+        ========================================== */}
+        <section className="mt-6">
+
+          <div className="mb-3 flex items-center justify-between">
+
+            <div>
+              <h2 className="text-base font-bold text-slate-900">
+                Recent Assessments
+              </h2>
+
+              <p className="text-[10px] text-slate-500">
+                Your latest health risk assessments
+              </p>
+            </div>
+
+            <button className="text-[11px] font-medium text-teal-700 hover:text-teal-800">
+              View All
+            </button>
+
+          </div>
+
+
+          {/* Prediction 2 */}
+          <div className="mb-2 rounded-xl border border-slate-200 bg-white p-4">
+
+            <div className="flex items-start justify-between">
+
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Prediction #2
+                </h3>
+
+                <p className="text-[10px] text-slate-500">
+                  9/15/2026
+                </p>
+              </div>
+
+              <button className="text-[10px] text-teal-700">
+                View Details →
+              </button>
+
+            </div>
+
+            <div className="mt-3 grid grid-cols-3">
+
+              <div>
+                <p className="text-[9px] text-slate-400">
+                  Result
+                </p>
+
+                <p className="text-[11px] font-medium text-slate-800">
+                  Low Risk of Diabetes
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[9px] text-slate-400">
+                  Risk Level
+                </p>
+
+                <p className="text-[11px] font-medium text-slate-800">
+                  LOW
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[9px] text-slate-400">
+                  Probability
+                </p>
+
+                <p className="text-[11px] font-medium text-slate-800">
+                  12.0%
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {/* Prediction 3 */}
+          <div className="mb-2 rounded-xl border border-slate-200 bg-white p-4">
+
+            <div className="flex items-start justify-between">
+
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Prediction #3
+                </h3>
+
+                <p className="text-[10px] text-slate-500">
+                  9/15/2026
+                </p>
+              </div>
+
+              <button className="text-[10px] text-teal-700">
+                View Details →
+              </button>
+
+            </div>
+
+            <div className="mt-3 grid grid-cols-3">
+
+              <div>
+                <p className="text-[9px] text-slate-400">
+                  Result
+                </p>
+
+                <p className="text-[11px] font-medium text-slate-800">
+                  Low Risk of Diabetes
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[9px] text-slate-400">
+                  Risk Level
+                </p>
+
+                <p className="text-[11px] font-medium text-slate-800">
+                  LOW
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[9px] text-slate-400">
+                  Probability
+                </p>
+
+                <p className="text-[11px] font-medium text-slate-800">
+                  32.0%
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {/* Prediction 4 */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+
+            <div className="flex items-start justify-between">
+
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Prediction #4
+                </h3>
+
+                <p className="text-[10px] text-slate-500">
+                  9/15/2026
+                </p>
+              </div>
+
+              <button className="text-[10px] text-teal-700">
+                View Details →
+              </button>
+
+            </div>
+
+            <div className="mt-3 grid grid-cols-3">
+
+              <div>
+                <p className="text-[9px] text-slate-400">
+                  Result
+                </p>
+
+                <p className="text-[11px] font-medium text-slate-800">
+                  High Risk of Diabetes
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[9px] text-slate-400">
+                  Risk Level
+                </p>
+
+                <p className="text-[11px] font-medium text-red-600">
+                  HIGH
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[9px] text-slate-400">
+                  Probability
+                </p>
+
+                <p className="text-[11px] font-medium text-slate-800">
+                  57.0%
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        {/* ==========================================
+            QUICK ACTIONS
+        ========================================== */}
+        <section className="mt-6">
+
+          <h2 className="mb-3 text-base font-bold text-slate-900">
+            Quick Actions
+          </h2>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <h3 className="font-semibold text-slate-900">
+                New Assessment
+              </h3>
+
+              <p className="mt-1 text-xs text-slate-500">
+                Start a new health risk assessment.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <h3 className="font-semibold text-slate-900">
+                Prediction History
+              </h3>
+
+              <p className="mt-1 text-xs text-slate-500">
+                Review your previous assessments.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-white p-4">
+              <h3 className="font-semibold text-slate-900">
+                My Profile
+              </h3>
+
+              <p className="mt-1 text-xs text-slate-500">
+                Manage your personal information.
+              </p>
+            </div>
+
+          </div>
+
+        </section>
+
+      </main>
+
     </div>
   );
 };
 
-export default DashboardCard;
+export default Dashboard;

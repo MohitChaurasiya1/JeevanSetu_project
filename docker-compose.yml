@@ -10,11 +10,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-jeevansetu_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jeevansetu_password}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jeevansetu_user} -d ${POSTGRES_DB:-jeevansetu_db}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jeevansetu_user} -d ${POSTGRES_DB:-jeevansetu_db}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -29,7 +29,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env.example
+      - .env
     volumes:
       - ./backend:/app
       - backend_media:/app/media
