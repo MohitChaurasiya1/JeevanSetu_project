@@ -38,14 +38,14 @@ const AboutPage = () => {
   const teamMembers = [
    
     {
-      name: 'SATYA PRAKASH YADAV',
-      role: 'TEAM LEADER',
-      contribution: '-DATA COLLECTOR AND DATA VISUALIZATION',
-      image: '/images/teams/Satya.jpeg',
+     name: 'MOHIT CHAUASIYA',
+      role: 'TEAM MEMBER',
+      contribution: '-FRONTEND-DEVELOPER\n-OVERALL-TESTING',
+      image: '/images/teams/mohit.png', 
     },
      {
       name: 'ABHISHEK YADAV',
-      role: 'TEAM LEADER',
+      role: 'TEAM MEMBER',
       contribution: '-BACKEND-DEVELOPER',
       image: '/images/teams/Abhishek.jpeg',
     },
@@ -56,10 +56,10 @@ const AboutPage = () => {
       image: '/images/teams/Tushar.jpeg',
     },
     {
-      name: 'MOHIT CHAUASIYA',
+      name: 'SATYA PRAKASH YADAV',
       role: 'TEAM MEMBER',
-      contribution: '-FRONTEND-DEVELOPER\n-OVERALL-TESTING',
-      image: '/images/teams/mohit.png',
+      contribution: '-DATA COLLECTOR AND DATA VISUALIZATION',
+      image: '/images/teams/Satya.jpeg',
     },
 
   ];
