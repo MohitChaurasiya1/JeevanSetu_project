@@ -19,7 +19,7 @@ const LoginPage = () => {
     setError('');
 
     if (!username.trim() || !password) {
-      setError('Please enter username and password.');
+      setError('Please enter your username or email address and password.');
       return;
     }
 
@@ -34,9 +34,11 @@ const LoginPage = () => {
         setError(backendError.detail);
       } else if (backendError?.non_field_errors) {
         setError(backendError.non_field_errors[0]);
+      } else if (backendError?.error) {
+        setError(backendError.error);
       } else {
         setError(
-          'Login failed. Please check your username and password.'
+          'Invalid credentials. Please check your username/email and password.'
         );
       }
     }
@@ -60,13 +62,13 @@ const LoginPage = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Username */}
+          {/* Username or Email */}
           <div>
             <label
               htmlFor="username"
               className="block text-sm font-medium mb-1"
             >
-              Username
+              Username or Email
             </label>
 
             <input
@@ -74,7 +76,7 @@ const LoginPage = () => {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
+              placeholder="Enter username or email address"
               autoComplete="username"
               disabled={loading}
               className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"

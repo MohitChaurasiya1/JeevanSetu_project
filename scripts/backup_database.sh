@@ -1,3 +1,4 @@
 #!/bin/bash
-echo "Backing up PostgreSQL database..."
-docker exec -t jeevansetu_postgres pg_dump -U jeevansetu_user jeevansetu_db > backup.sql
+echo "Backing up SQLite database from Docker container..."
+docker cp jeevansetu_backend:/app/data/db.sqlite3 ./backup_db.sqlite3
+echo "SQLite database backup saved to ./backup_db.sqlite3"

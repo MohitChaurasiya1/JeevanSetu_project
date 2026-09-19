@@ -1,16 +1,20 @@
 #!/bin/bash
 set -e
 
-echo "Waiting for PostgreSQL database..."
-python scripts/wait_for_db.py
+echo "==> Preparing SQLite storage directory..."
+mkdir -p /app/data
 
-echo "Making Migrations..."
-python manage.py makemigrations --noinput
-
-echo "Applying Database Migrations..."
+echo "==> Applying database migrations..."
 python manage.py migrate --noinput
 
-echo "Collecting Static Files..."
+echo "==> Seeding initial reference data..."
+python scripts/seed_initial_data.py
+
+echo "==> Checking superuser creation..."
+python scripts/create_superuser.py
+
+echo "==> Collecting static files..."
 python manage.py collectstatic --noinput
 
+echo "==> Backend ready. Starting server..."
 exec "$@"

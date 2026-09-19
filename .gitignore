@@ -30,6 +30,7 @@ backend/staticfiles/*
 machine_learning/models/*
 !machine_learning/models/.gitkeep
 *.pkl
+!backend/ml_engine/trained_models/*.pkl
 *.joblib
 .ipynb_checkpoints/
 

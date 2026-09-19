@@ -4,8 +4,9 @@ JeevanSetu is a cloud-based disease prediction platform designed to assess patie
 
 ## Technology Stack
 
-- **Frontend**: React (Vite), Tailwind CSS, React Router DOM, Axios, React Hook Form, Framer Motion, Recharts
-- **Backend**: Python, Django, Django REST Framework, Simple JWT, PostgreSQL
+- **Frontend**: React (Vite), Tailwind CSS, React Router DOM, Axios, Framer Motion, Recharts, Nginx
+- **Backend**: Python, Django, Django REST Framework, Simple JWT, Gunicorn, WhiteNoise
+- **Database**: SQLite (persistent `db.sqlite3` in Docker volume `sqlite_data`)
 - **Machine Learning**: pandas, NumPy, scikit-learn, Joblib, Random Forest Classifier
 - **DevOps**: Docker, Docker Compose, Git
 
@@ -13,25 +14,32 @@ JeevanSetu is a cloud-based disease prediction platform designed to assess patie
 
 ```text
 JeevanSetu/
-├── frontend/             # React SPA with Tailwind CSS
+├── frontend/             # React SPA with Tailwind CSS & Nginx
 ├── backend/              # Django REST Framework API & ML Engine
 ├── machine_learning/     # Data pipelines, training scripts & Jupyter notebooks
 ├── docs/                 # System design & API documentation
 ├── scripts/              # Setup, dev, and backup utility scripts
-├── docker-compose.yml    # Container deployment configuration
+├── docker-compose.yml    # Container deployment configuration (Frontend + Backend + SQLite)
 ├── .env.example          # Template environment variables
 ├── .gitignore
 ├── README.md
 └── LICENSE
 ```
 
-## Quickstart Setup Commands
+## Quickstart with Docker Compose
 
-### Prerequisites
-- Node.js (v18+)
-- Python (v3.10+)
-- PostgreSQL (v14+)
-- Docker & Docker Compose (Optional)
+To start the entire application (React/Nginx frontend + Django/Gunicorn backend + persistent SQLite):
+
+```bash
+docker compose up --build -d
+docker compose ps
+```
+
+- **Frontend Web App**: http://localhost (or http://localhost:5173)
+- **Django API Base**: http://localhost:8000/api
+- **Django Admin Portal**: http://localhost:8000/admin
+
+## Running Locally Without Docker
 
 ### Frontend Setup
 ```bash
@@ -48,37 +56,17 @@ python -m venv venv
 # On Linux/macOS: source venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py runserver
+python scripts/seed_initial_data.py
+python manage.py runserver 127.0.0.1:8000
 ```
-
-### Machine Learning Workspace Setup
-```bash
-cd machine_learning
-pip install -r requirements.txt
-jupyter notebook
-```
-
-### Docker Quickstart
-```bash
-docker-compose up --build
-```
-
-## Development URLs
-- Frontend UI: http://localhost:5173
-- Django API Base: http://localhost:8000/api
-- Django Admin Portal: http://localhost:8000/admin
 
 ## Key API Endpoints
-- `/api/auth/` - Authentication & Token management
+- `/api/auth/` - Authentication & Token management (Register, Login, Me, Token Refresh)
 - `/api/diseases/` - Disease directory & details
 - `/api/symptoms/` - Symptom catalog
-- `/api/predictions/` - Disease risk prediction engine
+- `/api/predictions/` - Disease risk prediction engine & user history
+- `/api/contact/` - Public visitor inquiries & notifications
 - `/api/feedback/` - User feedback submission
-- `/api/admin-panel/` - Admin overview & OTP verification
+- `/api/admin-panel/` - Admin overview & metrics
 - `/api/audit-logs/` - Activity audit trail
 - `/api/ml-models/` - Model version management
-
-## Future Roadmap
-1. Complete ML model training with validated clinical datasets.
-2. Integrate real-time notification service (email / SMS OTP).
-3. Connect disease prediction models with interactive dynamic frontend components.
