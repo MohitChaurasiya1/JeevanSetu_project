@@ -47,6 +47,8 @@ export const ROUTES = {
   ADMIN_ML_MODEL_UPLOAD: '/admin/ml-models/upload',
   ADMIN_FEEDBACK: '/admin/feedback',
   ADMIN_FEEDBACK_DETAILS: '/admin/feedback/:id',
+  ADMIN_CONTACT_MESSAGES: '/admin/contact-messages',
+  ADMIN_CONTACT_MESSAGE_DETAILS: '/admin/contact-messages/:id',
   ADMIN_ADMINS: '/admin/admins',
   ADMIN_ADMIN_FORM: '/admin/admins/new',
   ADMIN_ACTIVITY_LOGS: '/admin/activity-logs',

@@ -5,6 +5,7 @@ import {
   Textarea,
   Alert,
 } from '../../../components/common';
+import contactApi from '../../../api/contactApi';
 
 // ─── Validation helpers ────────────────────────────────────────────────────────
 
@@ -69,6 +70,7 @@ const ContactPage = () => {
   const [fields, setFields] = useState(INITIAL_FORM);
   const [fieldErrors, setFieldErrors] = useState({});
   const [submitStatus, setSubmitStatus] = useState(null); // null | 'loading' | 'success' | 'error'
+  const [apiErrorMessage, setApiErrorMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -81,6 +83,7 @@ const ContactPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitStatus === 'loading') return;
 
     // Client-side validation
     const errors = validate(fields);
@@ -94,35 +97,46 @@ const ContactPage = () => {
     }
 
     setFieldErrors({});
+    setApiErrorMessage('');
     setSubmitStatus('loading');
 
-    /*
-     * API INTEGRATION PENDING
-     * ────────────────────────────────────────────────────────────────────────
-     * The backend `Feedback` model (POST /api/feedback/) requires authentication
-     * and a `user` FK — it cannot accept anonymous public contact submissions.
-     *
-     * A dedicated public contact-submission endpoint is needed on the backend
-     * (e.g. POST /api/contact/) before this form can be wired to the API.
-     *
-     * When that endpoint is available, replace the simulated delay below with:
-     *
-     *   import axiosInstance from '../../../api/axiosInstance';
-     *   await axiosInstance.post('/contact/', {
-     *     full_name: fields.fullName.trim(),
-     *     email: fields.email.trim(),
-     *     phone: fields.phone.trim() || undefined,
-     *     message: fields.message.trim(),
-     *   });
-     *
-     * ────────────────────────────────────────────────────────────────────────
-     * For now, simulate a brief processing delay so all UI states are testable.
-     */
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      // Simulated success — replace with real API call when endpoint is available
+      await contactApi.submitContactMessage({
+        full_name: fields.fullName.trim(),
+        email: fields.email.trim(),
+        phone: fields.phone.trim() || undefined,
+        message: fields.message.trim(),
+      });
+
       setSubmitStatus('success');
-    } catch {
+      setFields(INITIAL_FORM);
+    } catch (err) {
+      let errorMsg = 'Your message could not be submitted. Please try again.';
+
+      if (err.response?.data) {
+        const data = err.response.data;
+        if (typeof data === 'string') {
+          errorMsg = data;
+        } else if (data.detail) {
+          errorMsg = data.detail;
+        } else if (data.message) {
+          errorMsg = data.message;
+        } else if (typeof data === 'object') {
+          const backendFieldErrors = {};
+          if (data.full_name) backendFieldErrors.fullName = Array.isArray(data.full_name) ? data.full_name[0] : data.full_name;
+          if (data.email) backendFieldErrors.email = Array.isArray(data.email) ? data.email[0] : data.email;
+          if (data.phone) backendFieldErrors.phone = Array.isArray(data.phone) ? data.phone[0] : data.phone;
+          if (data.message) backendFieldErrors.message = Array.isArray(data.message) ? data.message[0] : data.message;
+          if (Object.keys(backendFieldErrors).length > 0) {
+            setFieldErrors((prev) => ({ ...prev, ...backendFieldErrors }));
+            errorMsg = 'Please correct the highlighted errors and try again.';
+          }
+        }
+      } else if (err.message === 'Network Error' || !err.response) {
+        errorMsg = 'Network error. Please check your internet connection and try again.';
+      }
+
+      setApiErrorMessage(errorMsg);
       setSubmitStatus('error');
     }
   };
@@ -131,6 +145,7 @@ const ContactPage = () => {
     setFields(INITIAL_FORM);
     setFieldErrors({});
     setSubmitStatus(null);
+    setApiErrorMessage('');
   };
 
   const isLoading = submitStatus === 'loading';
@@ -158,8 +173,35 @@ const ContactPage = () => {
             aria-label="Contact information"
             className="lg:col-span-2 space-y-4"
           >
+            {/* Direct Email to Admin */}
             <InfoCard
-              heading="General Questions"
+              heading="Direct Administrator Contact"
+              icon={
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              }
+            >
+              All contact submissions are automatically delivered directly to our administrator's inbox:
+              <div className="mt-2 font-semibold">
+                <a
+                  href="mailto:mohitkumarchaurasiya2005@gmail.com"
+                  className="text-primary hover:underline inline-flex items-center gap-1.5"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
+                  </svg>
+                  mohitkumarchaurasiya2005@gmail.com
+                </a>
+              </div>
+              <p className="mt-1 text-xs text-text-muted">
+                Typical response time: within 24 to 48 hours.
+              </p>
+            </InfoCard>
+
+            <InfoCard
+              heading="General & Technical Inquiries"
               icon={
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
@@ -167,38 +209,25 @@ const ContactPage = () => {
                 </svg>
               }
             >
-              Use the form to ask any general questions about JeevanSetu,
-              including how to use the platform or how predictions are generated.
+              Questions about disease prediction models, account management, or reporting a technical bug?
+              Provide the details in the form and our team will get in touch with you.
             </InfoCard>
 
             <InfoCard
-              heading="JeevanSetu Support"
+              heading="Project & Collaboration"
               icon={
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
-                    d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               }
             >
-              If you are experiencing a technical issue, please describe the
-              problem clearly in your message and include any relevant details.
-            </InfoCard>
-
-            <InfoCard
-              heading="Project Information"
-              icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              }
-            >
-              JeevanSetu is a healthcare-focused informational platform. For
-              information about the project, use the{' '}
+              Interested in collaborating, research partnerships, or learning more about the team behind JeevanSetu?
+              Visit our{' '}
               <a href="/about" className="text-primary hover:underline font-medium">
                 About page
               </a>{' '}
-              or submit a message here.
+              or leave a message here.
             </InfoCard>
 
             {/* Medical disclaimer */}
@@ -250,7 +279,7 @@ const ContactPage = () => {
                       <Alert
                         variant="error"
                         title="Unable to Send Message"
-                        message="Your message could not be submitted. Please try again."
+                        message={apiErrorMessage || "Your message could not be submitted. Please try again."}
                         dismissible
                         onClose={() => setSubmitStatus(null)}
                       />
