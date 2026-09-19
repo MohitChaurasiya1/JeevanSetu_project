@@ -36,17 +36,18 @@ const AboutPage = () => {
   // Team members
   // Add image path when a member's photo is available.
   const teamMembers = [
+   
     {
+      name: 'SATYA PRAKASH YADAV',
+      role: 'TEAM LEADER',
+      contribution: '-DATA COLLECTOR AND DATA VISUALIZATION',
+      image: '/images/teams/Satya.jpeg',
+    },
+     {
       name: 'ABHISHEK YADAV',
       role: 'TEAM LEADER',
       contribution: '-BACKEND-DEVELOPER',
       image: '/images/teams/Abhishek.jpeg',
-    },
-    {
-      name: 'SATYA PRAKASH YADAV',
-      role: 'TEAM MEMBER',
-      contribution: '-DATA COLLECTOR AND DATA VISUALIZATION',
-      image: '/images/teams/Satya.jpeg',
     },
     {
       name: 'TUSHAR RAWAT',
