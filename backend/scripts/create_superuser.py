@@ -16,8 +16,8 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-email = os.getenv('DJANGO_SUPERUSER_EMAIL', '').strip()
-password = os.getenv('DJANGO_SUPERUSER_PASSWORD', '').strip()
+email = (os.getenv('DJANGO_SUPERUSER_EMAIL', '').strip() or 'mohitkumarchaurasiya2005@gmail.com')
+password = (os.getenv('DJANGO_SUPERUSER_PASSWORD', '').strip() or 'Admin@12345')
 username = os.getenv('DJANGO_SUPERUSER_USERNAME', '').strip() or (email.split('@')[0] if email else 'admin')
 full_name = os.getenv('DJANGO_SUPERUSER_FULL_NAME', 'Admin User').strip()
 
