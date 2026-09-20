@@ -1,27 +1,26 @@
+import os
+from pathlib import Path
 from .base import *
 
 DEBUG = True
 
+# Development CORS - Allow local frontend
 CORS_ALLOW_ALL_ORIGINS = True
 
-if os.getenv('USE_SQLITE', 'True').lower() in {'1', 'true', 'yes', 'on'}:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+# Local Development Database: Always SQLite using existing project db.sqlite3
+sqlite_path_env = os.getenv('SQLITE_DB_PATH')
+if sqlite_path_env:
+    sqlite_path = Path(sqlite_path_env)
+    SQLITE_DB_PATH = sqlite_path if sqlite_path.is_absolute() else BASE_DIR / sqlite_path
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('POSTGRES_DB', 'jeevansetu_db'),
-            'USER': os.getenv('POSTGRES_USER', 'jeevansetu_user'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'jeevansetu_password'),
-            'HOST': os.getenv('POSTGRES_HOST', 'postgres'),
-            'PORT': os.getenv('POSTGRES_PORT', '5432'),
-        }
-    }
+    SQLITE_DB_PATH = BASE_DIR / 'db.sqlite3'
 
-# Development email notification recipient
-ADMIN_NOTIFICATION_EMAIL = os.getenv('ADMIN_NOTIFICATION_EMAIL', 'mohitkumarchaurasiya2005@gmail.com')
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': SQLITE_DB_PATH,
+    }
+}
+
+# Development email notification recipient from environment
+ADMIN_NOTIFICATION_EMAIL = os.getenv('ADMIN_NOTIFICATION_EMAIL', '')

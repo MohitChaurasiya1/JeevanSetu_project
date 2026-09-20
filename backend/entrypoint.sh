@@ -1,8 +1,11 @@
 #!/bin/bash
 set -e
 
-echo "==> Preparing SQLite storage directory..."
-mkdir -p /app/data
+echo "==> Preparing local storage directories..."
+mkdir -p /app/data /app/staticfiles /app/media
+
+echo "==> Waiting for database connection..."
+python scripts/wait_for_db.py
 
 echo "==> Applying database migrations..."
 python manage.py migrate --noinput

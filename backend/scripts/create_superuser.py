@@ -16,12 +16,14 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-email = (os.getenv('DJANGO_SUPERUSER_EMAIL', '').strip() or 'mohitkumarchaurasiya2005@gmail.com')
-password = (os.getenv('DJANGO_SUPERUSER_PASSWORD', '').strip() or 'Admin@12345')
-username = os.getenv('DJANGO_SUPERUSER_USERNAME', '').strip() or (email.split('@')[0] if email else 'admin')
+email = os.getenv('DJANGO_SUPERUSER_EMAIL', '').strip()
+password = os.getenv('DJANGO_SUPERUSER_PASSWORD', '').strip()
+username = os.getenv('DJANGO_SUPERUSER_USERNAME', '').strip()
+if not username and email:
+    username = email.split('@')[0]
 full_name = os.getenv('DJANGO_SUPERUSER_FULL_NAME', 'Admin User').strip()
 
-if email and password:
+if email and password and username:
     if not User.objects.filter(email=email).exists() and not User.objects.filter(username=username).exists():
         user = User.objects.create_superuser(
             username=username,
@@ -35,6 +37,6 @@ if email and password:
         )
         print(f"Superuser '{username}' ({email}) created successfully.")
     else:
-        print(f"Superuser ({email} or {username}) already exists. Skipping creation.")
+        print(f"Superuser '{username}' / '{email}' already exists. Skipping creation.")
 else:
     print("DJANGO_SUPERUSER_EMAIL / DJANGO_SUPERUSER_PASSWORD not provided. Skipping auto superuser creation.")

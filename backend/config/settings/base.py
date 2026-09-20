@@ -9,11 +9,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent  # = .../backend
 _PROJECT_ROOT = BASE_DIR.parent                            # = .../JeevanSetu_project
 _ENV_FILE = _PROJECT_ROOT / '.env'
 
-# Load .env from project root (override=True so it always wins over shell defaults)
+# Load .env from project root (system/container env variables take precedence)
 if _ENV_FILE.exists():
-    load_dotenv(dotenv_path=_ENV_FILE, override=True)
+    load_dotenv(dotenv_path=_ENV_FILE, override=False)
 else:
-    load_dotenv(override=True)  # fallback: search cwd and parents
+    load_dotenv(override=False)  # fallback: search cwd and parents
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-jeevansetu-default-key-change-in-production")
 
@@ -121,7 +121,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Database Configuration (SQLite ONLY across all environments)
+# Database Configuration (Default / Local SQLite)
 sqlite_path_env = os.getenv('SQLITE_DB_PATH')
 if sqlite_path_env:
     sqlite_path = Path(sqlite_path_env)
@@ -140,10 +140,10 @@ DATABASES = {
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'mohitkumarchaurasiya2005@gmail.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'fmfq frqr jqro ozgh')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'JeevanSetu <mohitkumarchaurasiya2005@gmail.com>')
-ADMIN_NOTIFICATION_EMAIL = os.getenv('ADMIN_NOTIFICATION_EMAIL', 'mohitkumarchaurasiya2005@gmail.com')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'JeevanSetu <noreply@jeevansetu.com>')
+ADMIN_NOTIFICATION_EMAIL = os.getenv('ADMIN_NOTIFICATION_EMAIL', '')
 
 
