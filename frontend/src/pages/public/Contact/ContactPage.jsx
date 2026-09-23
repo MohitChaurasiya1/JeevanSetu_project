@@ -5,7 +5,6 @@ import {
   Textarea,
   Alert,
 } from '../../../components/common';
-import contactApi from '../../../api/contactApi';
 
 // ─── Validation helpers ────────────────────────────────────────────────────────
 
@@ -16,26 +15,26 @@ const PHONE_RE = /^[+\d][\d\s\-().]{6,17}$/;
 const validate = (fields) => {
   const errors = {};
 
-  const name = fields.fullName.trim();
+  const name = (fields.name || '').trim();
   if (!name) {
-    errors.fullName = 'Full name is required.';
+    errors.name = 'Full name is required.';
   } else if (name.length < 2) {
-    errors.fullName = 'Full name must be at least 2 characters.';
+    errors.name = 'Full name must be at least 2 characters.';
   }
 
-  const email = fields.email.trim();
+  const email = (fields.email || '').trim();
   if (!email) {
     errors.email = 'Email address is required.';
   } else if (!EMAIL_RE.test(email)) {
     errors.email = 'Please enter a valid email address.';
   }
 
-  const phone = fields.phone.trim();
+  const phone = (fields.phone || '').trim();
   if (phone && !PHONE_RE.test(phone)) {
     errors.phone = 'Please enter a valid phone number.';
   }
 
-  const message = fields.message.trim();
+  const message = (fields.message || '').trim();
   if (!message) {
     errors.message = 'Message is required.';
   } else if (message.length < 10) {
@@ -64,7 +63,7 @@ const InfoCard = ({ icon, heading, children }) => (
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-const INITIAL_FORM = { fullName: '', email: '', phone: '', message: '' };
+const INITIAL_FORM = { name: '', email: '', phone: '', message: '' };
 
 const ContactPage = () => {
   const [fields, setFields] = useState(INITIAL_FORM);
@@ -101,42 +100,27 @@ const ContactPage = () => {
     setSubmitStatus('loading');
 
     try {
-      await contactApi.submitContactMessage({
-        full_name: fields.fullName.trim(),
-        email: fields.email.trim(),
-        phone: fields.phone.trim() || undefined,
-        message: fields.message.trim(),
+      const formData = new FormData(e.target);
+      formData.set('form-name', 'contact');
+      formData.set('name', fields.name.trim());
+      formData.set('email', fields.email.trim());
+      formData.set('phone', fields.phone.trim());
+      formData.set('message', fields.message.trim());
+
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData).toString(),
       });
 
-      setSubmitStatus('success');
-      setFields(INITIAL_FORM);
-    } catch (err) {
-      let errorMsg = 'Your message could not be submitted. Please try again.';
-
-      if (err.response?.data) {
-        const data = err.response.data;
-        if (typeof data === 'string') {
-          errorMsg = data;
-        } else if (data.detail) {
-          errorMsg = data.detail;
-        } else if (data.message) {
-          errorMsg = data.message;
-        } else if (typeof data === 'object') {
-          const backendFieldErrors = {};
-          if (data.full_name) backendFieldErrors.fullName = Array.isArray(data.full_name) ? data.full_name[0] : data.full_name;
-          if (data.email) backendFieldErrors.email = Array.isArray(data.email) ? data.email[0] : data.email;
-          if (data.phone) backendFieldErrors.phone = Array.isArray(data.phone) ? data.phone[0] : data.phone;
-          if (data.message) backendFieldErrors.message = Array.isArray(data.message) ? data.message[0] : data.message;
-          if (Object.keys(backendFieldErrors).length > 0) {
-            setFieldErrors((prev) => ({ ...prev, ...backendFieldErrors }));
-            errorMsg = 'Please correct the highlighted errors and try again.';
-          }
-        }
-      } else if (err.message === 'Network Error' || !err.response) {
-        errorMsg = 'Network error. Please check your internet connection and try again.';
+      if (response.ok) {
+        setSubmitStatus('success');
+        setFields(INITIAL_FORM);
+      } else {
+        throw new Error(`Server returned status ${response.status}`);
       }
-
-      setApiErrorMessage(errorMsg);
+    } catch (err) {
+      setApiErrorMessage('Your message could not be submitted. Please try again.');
       setSubmitStatus('error');
     }
   };
@@ -287,23 +271,37 @@ const ContactPage = () => {
                   )}
 
                   <form
+                    name="contact"
+                    method="POST"
+                    data-netlify="true"
+                    data-netlify-honeypot="bot-field"
                     onSubmit={handleSubmit}
                     noValidate
                     aria-label="Contact form"
                     className="space-y-5"
                   >
+                    {/* Netlify Form Hidden Identifier */}
+                    <input type="hidden" name="form-name" value="contact" />
+
+                    {/* Honeypot field for bot spam prevention */}
+                    <p className="hidden" aria-hidden="true">
+                      <label>
+                        Don’t fill this out if you're human: <input name="bot-field" tabIndex="-1" autoComplete="off" />
+                      </label>
+                    </p>
+
                     {/* Full Name */}
                     <Input
-                      id="contact-fullName"
-                      name="fullName"
+                      id="contact-name"
+                      name="name"
                       label="Full Name"
                       type="text"
-                      value={fields.fullName}
+                      value={fields.name}
                       onChange={handleChange}
                       placeholder="Enter your full name"
                       required
                       disabled={isLoading}
-                      error={fieldErrors.fullName}
+                      error={fieldErrors.name}
                       autoComplete="name"
                     />
 
