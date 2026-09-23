@@ -46,7 +46,7 @@
 | **Frontend** | React 18, Vite, Tailwind CSS, Framer Motion, Recharts, Axios, React Router DOM, React Icons |
 | **Backend** | Python 3.10+, Django 5.x, Django REST Framework (DRF), Simple JWT, Gunicorn, WhiteNoise |
 | **Machine Learning** | scikit-learn, Joblib, pandas, NumPy (Random Forest, Gradient Boosting, Ensembles) |
-| **Database** | SQLite3 (`db.sqlite3` with persistent volume support) |
+| **Database** | PostgreSQL (`DATABASE_URL` with persistent Docker volume support) |
 | **DevOps & Tools** | Docker, Docker Compose, Nginx, Git, PowerShell / Bash Automation |
 
 ---
@@ -99,7 +99,7 @@ Before running the application in either mode, prepare your environment configur
    ALLOWED_HOSTS=localhost,127.0.0.1,backend,frontend
 
    # Database
-   SQLITE_DB_PATH=db.sqlite3
+   DATABASE_URL=postgres://jeevansetu_dev:jeevansetu_pass@localhost:5432/jeevansetu
 
    # Frontend API Base URL
    VITE_API_BASE_URL=http://localhost:8000/api
@@ -252,8 +252,8 @@ For faster operations, helper scripts are available in the [`scripts/`](file:///
 | **Full Setup (Frontend + Backend deps)** | `bash ./scripts/setup_project.sh` |
 | **Start Docker Services** | `bash ./scripts/start_development.sh` |
 | **Stop Docker Services** | `bash ./scripts/stop_services.sh` |
-| **Backup SQLite Database** | `bash ./scripts/backup_database.sh` |
-| **Restore SQLite Database** | `bash ./scripts/restore_database.sh` |
+| **Backup PostgreSQL Database** | `bash ./scripts/backup_database.sh` |
+| **Restore PostgreSQL Database** | `bash ./scripts/restore_database.sh` |
 
 ---
 
@@ -305,8 +305,8 @@ If you seeded using `python scripts/create_superuser.py`:
 - Ensure all models and encoders exist in `backend/ml_engine/models/`.
 - If missing, train and export models using scripts in `machine_learning/`.
 
-### 4. Database Missing or Fresh Reset Needed
-- Delete `backend/db.sqlite3` and run:
+### 4. Database Reset Needed
+- Run:
   ```bash
   python manage.py migrate
   python scripts/seed_initial_data.py

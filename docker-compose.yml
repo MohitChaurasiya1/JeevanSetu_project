@@ -1,4 +1,17 @@
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: jeevansetu_db
+    restart: always
+    environment:
+      POSTGRES_DB: jeevansetu
+      POSTGRES_USER: jeevansetu_dev
+      POSTGRES_PASSWORD: jeevansetu_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   backend:
     build:
       context: ./backend
@@ -9,16 +22,17 @@ services:
       - .env
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.production
-      SQLITE_DB_PATH: /app/data/db.sqlite3
+      DATABASE_URL: postgres://jeevansetu_dev:jeevansetu_pass@db:5432/jeevansetu
       ALLOWED_HOSTS: localhost,127.0.0.1,backend,frontend,host.docker.internal
       CORS_ALLOWED_ORIGINS: http://localhost,http://localhost:80,http://localhost:5173,http://127.0.0.1,http://127.0.0.1:5173
       CSRF_TRUSTED_ORIGINS: http://localhost,http://localhost:80,http://localhost:5173,http://127.0.0.1,http://127.0.0.1:5173
     ports:
       - "8000:8000"
     volumes:
-      - sqlite_data:/app/data
       - backend_media:/app/media
       - backend_static:/app/staticfiles
+    depends_on:
+      - db
 
   frontend:
     build:
@@ -33,6 +47,6 @@ services:
       - backend
 
 volumes:
-  sqlite_data:
+  postgres_data:
   backend_media:
   backend_static:

@@ -2,18 +2,21 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+import dj_database_url
 
-# settings/base.py is at: backend/config/settings/base.py
-# .env is at:              JeevanSetu_project/.env  (two levels above backend/)
+# Path configuration
 BASE_DIR = Path(__file__).resolve().parent.parent.parent  # = .../backend
 _PROJECT_ROOT = BASE_DIR.parent                            # = .../JeevanSetu_project
-_ENV_FILE = _PROJECT_ROOT / '.env'
 
-# Load .env from project root (system/container env variables take precedence)
-if _ENV_FILE.exists():
-    load_dotenv(dotenv_path=_ENV_FILE, override=False)
-else:
-    load_dotenv(override=False)  # fallback: search cwd and parents
+# Load .env: backend/.env takes precedence for backend configuration, followed by root .env
+_BACKEND_ENV = BASE_DIR / '.env'
+_ROOT_ENV = _PROJECT_ROOT / '.env'
+
+if _BACKEND_ENV.exists():
+    load_dotenv(dotenv_path=_BACKEND_ENV, override=False)
+
+if _ROOT_ENV.exists():
+    load_dotenv(dotenv_path=_ROOT_ENV, override=False)
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-jeevansetu-default-key-change-in-production")
 
@@ -102,6 +105,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('ACCESS_TOKEN_LIFETIME', 60))),
     'REFRESH_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('REFRESH_TOKEN_LIFETIME', 1440))),
     'AUTH_HEADER_TYPES': ('Bearer',),
+    'UPDATE_LAST_LOGIN': True,
 }
 
 STATIC_URL = '/static/'
@@ -121,19 +125,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Database Configuration (Default / Local SQLite)
-sqlite_path_env = os.getenv('SQLITE_DB_PATH')
-if sqlite_path_env:
-    sqlite_path = Path(sqlite_path_env)
-    SQLITE_DB_PATH = sqlite_path if sqlite_path.is_absolute() else BASE_DIR / sqlite_path
-else:
-    SQLITE_DB_PATH = BASE_DIR / 'db.sqlite3'
-
+# Database Configuration (PostgreSQL only)
+# Reads DATABASE_URL from environment. Default points to local Docker PostgreSQL.
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': SQLITE_DB_PATH,
-    }
+    'default': dj_database_url.config(
+        default='postgres://jeevansetu_dev:jeevansetu_pass@localhost:5433/jeevansetu',
+        conn_max_age=600,
+    )
 }
 
 # Email Configuration

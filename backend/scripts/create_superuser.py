@@ -9,7 +9,8 @@ if str(BACKEND_DIR) not in sys.path:
 
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', os.getenv('DJANGO_SETTINGS_MODULE', 'config.settings.production'))
+# Setup Django environment
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', os.getenv('DJANGO_SETTINGS_MODULE', 'config.settings.development'))
 django.setup()
 
 from django.contrib.auth import get_user_model

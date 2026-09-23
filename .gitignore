@@ -11,7 +11,12 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+# Database & dumps
 *.sqlite3
+*.sql
+*.dump
+backup_db.*
+backup_jeevansetu*
 .pytest_cache/
 .coverage
 
