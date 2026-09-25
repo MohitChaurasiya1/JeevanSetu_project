@@ -5,17 +5,20 @@ import {
   Textarea,
   Alert,
 } from '../../../components/common';
+import { submitContactMessage } from '../../../api/contactApi';
 
-// ─── Validation helpers ────────────────────────────────────────────────────────
+// ─── Validation helpers ───────────────────────────────────────────────────────
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Accepts optional country code, spaces, dashes, dots, parens — 7–15 digits
+
+// Accepts optional country code, spaces, dashes, dots, parens
 const PHONE_RE = /^[+\d][\d\s\-().]{6,17}$/;
 
 const validate = (fields) => {
   const errors = {};
 
   const name = (fields.name || '').trim();
+
   if (!name) {
     errors.name = 'Full name is required.';
   } else if (name.length < 2) {
@@ -23,6 +26,7 @@ const validate = (fields) => {
   }
 
   const email = (fields.email || '').trim();
+
   if (!email) {
     errors.email = 'Email address is required.';
   } else if (!EMAIL_RE.test(email)) {
@@ -30,11 +34,13 @@ const validate = (fields) => {
   }
 
   const phone = (fields.phone || '').trim();
+
   if (phone && !PHONE_RE.test(phone)) {
     errors.phone = 'Please enter a valid phone number.';
   }
 
   const message = (fields.message || '').trim();
+
   if (!message) {
     errors.message = 'Message is required.';
   } else if (message.length < 10) {
@@ -44,7 +50,7 @@ const validate = (fields) => {
   return errors;
 };
 
-// ─── Info card sub-component ───────────────────────────────────────────────────
+// ─── Info Card ────────────────────────────────────────────────────────────────
 
 const InfoCard = ({ icon, heading, children }) => (
   <div className="flex items-start gap-4 p-5 bg-white rounded-xl border border-border">
@@ -54,76 +60,129 @@ const InfoCard = ({ icon, heading, children }) => (
     >
       <span className="text-primary">{icon}</span>
     </div>
+
     <div>
-      <p className="text-sm font-semibold text-text mb-0.5">{heading}</p>
-      <div className="text-sm text-text-secondary leading-relaxed">{children}</div>
+      <p className="text-sm font-semibold text-text mb-0.5">
+        {heading}
+      </p>
+
+      <div className="text-sm text-text-secondary leading-relaxed">
+        {children}
+      </div>
     </div>
   </div>
 );
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
+// ─── Initial Form ─────────────────────────────────────────────────────────────
 
-const INITIAL_FORM = { name: '', email: '', phone: '', message: '' };
+const INITIAL_FORM = {
+  name: '',
+  email: '',
+  phone: '',
+  message: '',
+};
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 const ContactPage = () => {
   const [fields, setFields] = useState(INITIAL_FORM);
   const [fieldErrors, setFieldErrors] = useState({});
-  const [submitStatus, setSubmitStatus] = useState(null); // null | 'loading' | 'success' | 'error'
+  const [submitStatus, setSubmitStatus] = useState(null);
   const [apiErrorMessage, setApiErrorMessage] = useState('');
+
+  // ─── Handle input changes ──────────────────────────────────────────────────
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFields((prev) => ({ ...prev, [name]: value }));
-    // Clear individual error on change
+
+    setFields((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Remove field-specific validation error
     if (fieldErrors[name]) {
-      setFieldErrors((prev) => { const n = { ...prev }; delete n[name]; return n; });
+      setFieldErrors((prev) => {
+        const nextErrors = { ...prev };
+        delete nextErrors[name];
+        return nextErrors;
+      });
+    }
+
+    // Remove previous API error when user edits the form
+    if (apiErrorMessage) {
+      setApiErrorMessage('');
+    }
+
+    if (submitStatus === 'error') {
+      setSubmitStatus(null);
     }
   };
 
+  // ─── Submit contact form ───────────────────────────────────────────────────
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (submitStatus === 'loading') return;
 
-    // Client-side validation
-    const errors = validate(fields);
-    if (Object.keys(errors).length > 0) {
-      setFieldErrors(errors);
-      // Focus the first field with an error
-      const firstKey = Object.keys(errors)[0];
-      const el = document.getElementById(`contact-${firstKey}`);
-      if (el) el.focus();
+    // Prevent duplicate submissions
+    if (submitStatus === 'loading') {
       return;
     }
 
+    // Validate form
+    const errors = validate(fields);
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+
+      // Focus first invalid field
+      const firstKey = Object.keys(errors)[0];
+      const element = document.getElementById(`contact-${firstKey}`);
+
+      if (element) {
+        element.focus();
+      }
+
+      return;
+    }
+
+    // Start loading
     setFieldErrors({});
     setApiErrorMessage('');
     setSubmitStatus('loading');
 
     try {
-      const formData = new FormData(e.target);
-      formData.set('form-name', 'contact');
-      formData.set('name', fields.name.trim());
-      formData.set('email', fields.email.trim());
-      formData.set('phone', fields.phone.trim());
-      formData.set('message', fields.message.trim());
-
-      const response = await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(formData).toString(),
+      // Send data to Django REST API
+      const response = await submitContactMessage({
+        full_name: fields.name.trim(),
+        email: fields.email.trim(),
+        phone: fields.phone.trim(),
+        message: fields.message.trim(),
       });
 
-      if (response.ok) {
-        setSubmitStatus('success');
-        setFields(INITIAL_FORM);
-      } else {
-        throw new Error(`Server returned status ${response.status}`);
-      }
-    } catch (err) {
-      setApiErrorMessage('Your message could not be submitted. Please try again.');
+      console.log('Contact message submitted successfully:', response);
+
+      // Show success only after API succeeds
+      setSubmitStatus('success');
+
+      // Clear form
+      setFields(INITIAL_FORM);
+    } catch (error) {
+      console.error('Contact submission failed:', error);
+
+      // Handle different possible API error formats
+      const backendMessage =
+        error?.response?.data?.detail ||
+        error?.response?.data?.message ||
+        error?.message ||
+        'Your message could not be submitted. Please try again.';
+
+      setApiErrorMessage(backendMessage);
       setSubmitStatus('error');
     }
   };
+
+  // ─── Reset form ─────────────────────────────────────────────────────────────
 
   const handleReset = () => {
     setFields(INITIAL_FORM);
@@ -138,77 +197,133 @@ const ContactPage = () => {
     <main className="min-h-screen bg-background py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
 
-        {/* ── Page Header ───────────────────────────────────────────────── */}
+        {/* Page Header */}
         <header className="mb-10 border-b border-border pb-8">
           <h1 className="text-3xl font-extrabold text-text tracking-tight sm:text-4xl mb-2">
             Contact Us
           </h1>
+
           <p className="text-base sm:text-lg text-text-secondary max-w-2xl leading-relaxed">
             Have a question or need help using JeevanSetu? Send us a message and
             we will get back to you.
           </p>
         </header>
 
-        {/* ── Two-column layout ─────────────────────────────────────────── */}
+        {/* Two-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 xl:gap-14">
 
-          {/* ── Left column — informational ──────────────────────────────── */}
+          {/* Left column */}
           <aside
             aria-label="Contact information"
             className="lg:col-span-2 space-y-4"
           >
-            {/* Direct Email to Admin */}
+
+            {/* Administrator Contact */}
             <InfoCard
               heading="Direct Administrator Contact"
               icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
-                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
                 </svg>
               }
             >
-              All contact submissions are automatically delivered directly to our administrator's inbox:
+              All contact submissions are automatically delivered directly to
+              our administrator's inbox:
+
               <div className="mt-2 font-semibold">
                 <a
                   href="mailto:mohitkumarchaurasiya2005@gmail.com"
                   className="text-primary hover:underline inline-flex items-center gap-1.5"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"
+                    />
                   </svg>
+
                   mohitkumarchaurasiya2005@gmail.com
                 </a>
               </div>
+
               <p className="mt-1 text-xs text-text-muted">
                 Typical response time: within 24 to 48 hours.
               </p>
             </InfoCard>
 
+            {/* General Questions */}
             <InfoCard
               heading="General & Technical Inquiries"
               icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
-                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               }
             >
-              Questions about disease prediction models, account management, or reporting a technical bug?
-              Provide the details in the form and our team will get in touch with you.
+              Questions about disease prediction models, account management,
+              or reporting a technical bug?
+
+              Provide the details in the form and our team will get in touch
+              with you.
             </InfoCard>
 
+            {/* Collaboration */}
             <InfoCard
               heading="Project & Collaboration"
               icon={
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.5"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656-.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
                 </svg>
               }
             >
-              Interested in collaborating, research partnerships, or learning more about the team behind JeevanSetu?
+              Interested in collaborating, research partnerships, or learning
+              more about the team behind JeevanSetu?
+
               Visit our{' '}
-              <a href="/about" className="text-primary hover:underline font-medium">
+              <a
+                href="/about"
+                className="text-primary hover:underline font-medium"
+              >
                 About page
               </a>{' '}
               or leave a message here.
@@ -223,28 +338,47 @@ const ContactPage = () => {
             </div>
           </aside>
 
-          {/* ── Right column — contact form ───────────────────────────────── */}
+          {/* Right column */}
           <section
             aria-label="Contact form"
             className="lg:col-span-3"
           >
             <div className="bg-white rounded-2xl border border-border shadow-sm p-6 sm:p-8">
 
-              {/* ── Success state ───────────────────────────────────────── */}
+              {/* Success */}
               {submitStatus === 'success' ? (
-                <div className="flex flex-col items-center text-center py-8 px-4" role="status" aria-live="polite">
+                <div
+                  className="flex flex-col items-center text-center py-8 px-4"
+                  role="status"
+                  aria-live="polite"
+                >
                   <div
                     aria-hidden="true"
                     className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-4"
                   >
-                    <svg className="w-7 h-7 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                    <svg
+                      className="w-7 h-7 text-success"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                   </div>
-                  <h2 className="text-xl font-bold text-text mb-2">Message Sent</h2>
+
+                  <h2 className="text-xl font-bold text-text mb-2">
+                    Message Sent
+                  </h2>
+
                   <p className="text-text-secondary text-sm mb-6 max-w-xs leading-relaxed">
                     Your message has been submitted successfully.
                   </p>
+
                   <Button
                     variant="outline"
                     onClick={handleReset}
@@ -255,40 +389,35 @@ const ContactPage = () => {
                 </div>
               ) : (
                 <>
-                  <h2 className="text-lg font-bold text-text mb-6">Send a Message</h2>
+                  <h2 className="text-lg font-bold text-text mb-6">
+                    Send a Message
+                  </h2>
 
-                  {/* ── Global error banner ─────────────────────────────── */}
+                  {/* API Error */}
                   {submitStatus === 'error' && (
                     <div className="mb-6">
                       <Alert
                         variant="error"
                         title="Unable to Send Message"
-                        message={apiErrorMessage || "Your message could not be submitted. Please try again."}
+                        message={
+                          apiErrorMessage ||
+                          'Your message could not be submitted. Please try again.'
+                        }
                         dismissible
-                        onClose={() => setSubmitStatus(null)}
+                        onClose={() => {
+                          setSubmitStatus(null);
+                          setApiErrorMessage('');
+                        }}
                       />
                     </div>
                   )}
 
                   <form
-                    name="contact"
-                    method="POST"
-                    data-netlify="true"
-                    data-netlify-honeypot="bot-field"
                     onSubmit={handleSubmit}
                     noValidate
                     aria-label="Contact form"
                     className="space-y-5"
                   >
-                    {/* Netlify Form Hidden Identifier */}
-                    <input type="hidden" name="form-name" value="contact" />
-
-                    {/* Honeypot field for bot spam prevention */}
-                    <p className="hidden" aria-hidden="true">
-                      <label>
-                        Don’t fill this out if you're human: <input name="bot-field" tabIndex="-1" autoComplete="off" />
-                      </label>
-                    </p>
 
                     {/* Full Name */}
                     <Input
@@ -320,7 +449,7 @@ const ContactPage = () => {
                       autoComplete="email"
                     />
 
-                    {/* Phone (optional) */}
+                    {/* Phone */}
                     <Input
                       id="contact-phone"
                       name="phone"
@@ -331,7 +460,9 @@ const ContactPage = () => {
                       placeholder="Optional"
                       disabled={isLoading}
                       error={fieldErrors.phone}
-                      helperText={!fieldErrors.phone ? 'Optional' : undefined}
+                      helperText={
+                        !fieldErrors.phone ? 'Optional' : undefined
+                      }
                       autoComplete="tel"
                     />
 
@@ -362,9 +493,11 @@ const ContactPage = () => {
                         Send Message
                       </Button>
                     </div>
+
                   </form>
                 </>
               )}
+
             </div>
           </section>
 
