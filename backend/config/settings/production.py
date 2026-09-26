@@ -64,10 +64,19 @@ DATABASES = {
 # CORS
 # ============================================================
 
-# Netlify production frontend
-CORS_ALLOWED_ORIGINS = [
-    "https://jeevansetu-web.netlify.app",
-]
+cors_allowed_env = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
+
+if cors_allowed_env:
+    CORS_ALLOWED_ORIGINS = [
+        origin.strip()
+        for origin in cors_allowed_env.split(",")
+        if origin.strip()
+    ]
+else:
+    # Netlify production frontend fallback
+    CORS_ALLOWED_ORIGINS = [
+        "https://jeevansetu-web.netlify.app",
+    ]
 
 CORS_ALLOW_ALL_ORIGINS = False
 
@@ -76,9 +85,18 @@ CORS_ALLOW_ALL_ORIGINS = False
 # CSRF
 # ============================================================
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://jeevansetu-web.netlify.app",
-]
+csrf_trusted_env = os.getenv("CSRF_TRUSTED_ORIGINS", "").strip()
+
+if csrf_trusted_env:
+    CSRF_TRUSTED_ORIGINS = [
+        origin.strip()
+        for origin in csrf_trusted_env.split(",")
+        if origin.strip()
+    ]
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://jeevansetu-web.netlify.app",
+    ]
 
 
 # ============================================================
