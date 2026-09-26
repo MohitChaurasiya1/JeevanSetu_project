@@ -1,8 +1,76 @@
 import logging
+import requests
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
 logger = logging.getLogger(__name__)
+
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+
+
+def _send_email(*, subject, text_body, html_body, to_email, to_name="", reply_to_email=None):
+    """
+    Sends an email using Brevo's HTTPS API if BREVO_API_KEY is configured
+    (recommended — works on hosts like Render's free tier that block
+    outbound SMTP ports). Falls back to Django's normal SMTP backend
+    otherwise. Returns True/False.
+    """
+    api_key = getattr(settings, "BREVO_API_KEY", "")
+
+    if api_key:
+        sender_email = getattr(settings, "BREVO_SENDER_EMAIL", "") or "noreply@jeevansetu.com"
+        sender_name = getattr(settings, "BREVO_SENDER_NAME", "JeevanSetu")
+
+        payload = {
+            "sender": {"name": sender_name, "email": sender_email},
+            "to": [{"email": to_email, "name": to_name or to_email}],
+            "subject": subject,
+            "htmlContent": html_body,
+            "textContent": text_body,
+        }
+        if reply_to_email:
+            payload["replyTo"] = {"email": reply_to_email}
+
+        try:
+            response = requests.post(
+                BREVO_API_URL,
+                json=payload,
+                headers={
+                    "api-key": api_key,
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                timeout=15,
+            )
+            if response.status_code in (200, 201):
+                logger.info(f"Email sent via Brevo API to {to_email} (subject: {subject})")
+                return True
+            logger.warning(
+                f"Brevo API returned {response.status_code} sending to {to_email}: {response.text}"
+            )
+            return False
+        except requests.RequestException as exc:
+            logger.warning(f"Brevo API request failed sending to {to_email}: {exc}")
+            return False
+
+    # Fallback: plain Django SMTP backend (will fail on hosts that block
+    # SMTP ports, e.g. Render free tier).
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "JeevanSetu <noreply@jeevansetu.com>")
+    try:
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=text_body,
+            from_email=from_email,
+            to=[to_email],
+            reply_to=[reply_to_email] if reply_to_email else None,
+        )
+        msg.attach_alternative(html_body, "text/html")
+        msg.send(fail_silently=False)
+        logger.info(f"Email sent via SMTP to {to_email} (subject: {subject})")
+        return True
+    except Exception as exc:
+        logger.warning(f"Could not send email via SMTP to {to_email}: {exc}")
+        return False
 
 
 def send_contact_received_notification(contact_message):
@@ -105,25 +173,19 @@ def send_contact_received_notification(contact_message):
     </html>
     """
 
-    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'JeevanSetu <noreply@jeevansetu.com>')
-
-    try:
-        msg = EmailMultiAlternatives(
-            subject=subject,
-            body=text_body,
-            from_email=from_email,
-            to=[admin_email],
-            reply_to=[contact_message.email],
-        )
-        msg.attach_alternative(html_body, "text/html")
-        msg.send(fail_silently=False)
-        logger.info(f"Admin notification email successfully dispatched for contact message #{contact_message.id} to {admin_email}")
-        return True
-    except Exception as exc:
-        logger.warning(
-            f"Could not send admin notification email for contact message #{contact_message.id}: {exc}"
-        )
-        return False
+    sent = _send_email(
+        subject=subject,
+        text_body=text_body,
+        html_body=html_body,
+        to_email=admin_email,
+        to_name="JeevanSetu Admin",
+        reply_to_email=contact_message.email,
+    )
+    if sent:
+        logger.info(f"Admin notification email dispatched for contact message #{contact_message.id} to {admin_email}")
+    else:
+        logger.warning(f"FAILED to send admin notification email for contact message #{contact_message.id}")
+    return sent
 
 
 def send_contact_response_email(contact_message):
@@ -199,22 +261,16 @@ def send_contact_response_email(contact_message):
     </html>
     """
 
-    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'JeevanSetu <noreply@jeevansetu.com>')
-
-    try:
-        msg = EmailMultiAlternatives(
-            subject=subject,
-            body=text_body,
-            from_email=from_email,
-            to=[contact_message.email],
-            reply_to=[admin_email],
-        )
-        msg.attach_alternative(html_body, "text/html")
-        msg.send(fail_silently=False)
+    sent = _send_email(
+        subject=subject,
+        text_body=text_body,
+        html_body=html_body,
+        to_email=contact_message.email,
+        to_name=contact_message.full_name,
+        reply_to_email=admin_email,
+    )
+    if sent:
         logger.info(f"Response email sent to {contact_message.email} for contact message #{contact_message.id}")
-        return True
-    except Exception as exc:
-        logger.warning(
-            f"Could not send response email to {contact_message.email} for message #{contact_message.id}: {exc}"
-        )
-        return False
+    else:
+        logger.warning(f"FAILED to send response email to {contact_message.email} for message #{contact_message.id}")
+    return sent
