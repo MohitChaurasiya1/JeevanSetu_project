@@ -32,12 +32,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third-party packages
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    
+
     # Local Apps
     'core',
     'accounts',
@@ -134,11 +134,19 @@ DATABASES = {
     )
 }
 
-# Email Configuration
+# Email Configuration (SMTP fallback -- blocked on Render free tier, kept for local/dev use)
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-DEFAULT_FROM_EMAIL =
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', os.getenv('EMAIL_HOST_USER') or 'JeevanSetu <mohitkumarchaurasiya2005@gmail.com>')
+ADMIN_NOTIFICATION_EMAIL = os.getenv('ADMIN_NOTIFICATION_EMAIL', 'mohitkumarchaurasiya2005@gmail.com')
+
+# Brevo (formerly Sendinblue) HTTPS API email settings -- used in preference to SMTP
+# because Render's free tier blocks outbound SMTP ports (25, 465, 587) but allows
+# plain HTTPS (443). See feedback/services.py for the send logic.
+BREVO_API_KEY = os.getenv('BREVO_API_KEY', '')
+BREVO_SENDER_EMAIL = os.getenv('BREVO_SENDER_EMAIL', '')
+BREVO_SENDER_NAME = os.getenv('BREVO_SENDER_NAME', 'JeevanSetu')

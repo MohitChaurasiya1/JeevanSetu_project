@@ -14,7 +14,7 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir --default-timeout=300 --retries=10 -r requirements.txt
 
-COPY backend/ .
+COPY . .
 
 RUN chmod +x entrypoint.sh build.sh
 

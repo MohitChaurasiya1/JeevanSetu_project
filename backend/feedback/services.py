@@ -180,7 +180,7 @@ def send_contact_received_notification(contact_message):
     )
 
 
-def send_contact_response_email(contact_message, response_text):
+def send_contact_response_email(contact_message, response_text=None):
     """
     Sends an email to the original sender when the admin responds to their
     contact message from the admin dashboard.
@@ -188,6 +188,9 @@ def send_contact_response_email(contact_message, response_text):
     if not contact_message.email:
         logger.info("Contact message has no email address. Skipping response email.")
         return False
+
+    if response_text is None:
+        response_text = contact_message.admin_response or ""
 
     subject = f"Re: Your message to JeevanSetu - #{contact_message.id}"
 
