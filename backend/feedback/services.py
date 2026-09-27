@@ -6,15 +6,70 @@ from django.core.mail import EmailMultiAlternatives
 logger = logging.getLogger(__name__)
 
 BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+RESEND_API_URL = "https://api.resend.com/emails"
+
+
+def _send_via_resend(api_key, *, subject, text_body, html_body, to_email, to_name="", reply_to_email=None):
+    """
+    Sends an email using Resend's HTTPS API. Used as the primary path since
+    it works on hosts like Render's free tier that block outbound SMTP ports.
+    Returns True/False.
+    """
+    sender = getattr(settings, "RESEND_FROM_EMAIL", "") or "JeevanSetu <onboarding@resend.dev>"
+
+    payload = {
+        "from": sender,
+        "to": [to_email],
+        "subject": subject,
+        "html": html_body,
+        "text": text_body,
+    }
+    if reply_to_email:
+        payload["reply_to"] = [reply_to_email]
+
+    try:
+        response = requests.post(
+            RESEND_API_URL,
+            json=payload,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            timeout=15,
+        )
+        if response.status_code in (200, 201):
+            logger.info(f"Email sent via Resend API to {to_email} (subject: {subject})")
+            return True
+        logger.warning(
+            f"Resend API returned {response.status_code} sending to {to_email}: {response.text}"
+        )
+        return False
+    except requests.RequestException as exc:
+        logger.warning(f"Resend API request failed sending to {to_email}: {exc}")
+        return False
 
 
 def _send_email(*, subject, text_body, html_body, to_email, to_name="", reply_to_email=None):
     """
-    Sends an email using Brevo's HTTPS API if BREVO_API_KEY is configured
-    (recommended -- works on hosts like Render's free tier that block
-    outbound SMTP ports). Falls back to Django's normal SMTP backend
-    otherwise. Returns True/False.
+    Sends an email, trying each configured provider in order:
+      1. Resend HTTPS API (RESEND_API_KEY) -- preferred, works on Render free tier.
+      2. Brevo HTTPS API (BREVO_API_KEY) -- fallback if configured instead.
+      3. Django's SMTP backend -- last resort, will hang/fail on hosts that
+         block outbound SMTP ports (e.g. Render free tier).
+    Returns True/False.
     """
+    resend_api_key = getattr(settings, "RESEND_API_KEY", "")
+    if resend_api_key:
+        return _send_via_resend(
+            resend_api_key,
+            subject=subject,
+            text_body=text_body,
+            html_body=html_body,
+            to_email=to_email,
+            to_name=to_name,
+            reply_to_email=reply_to_email,
+        )
+
     api_key = getattr(settings, "BREVO_API_KEY", "")
 
     if api_key:
