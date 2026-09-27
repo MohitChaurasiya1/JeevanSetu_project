@@ -142,7 +142,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', os.getenv('EMAIL_HOST_USER') or 'JeevanSetu <mohitkumarchaurasiya2005@gmail.com>')
-ADMIN_NOTIFICATION_EMAIL = os.getenv('ADMIN_NOTIFICATION_EMAIL', 'mohitkumarchaurasiya2005@gmail.com')
+ADMIN_NOTIFICATION_EMAIL = os.getenv('ADMIN_NOTIFICATION_EMAIL', 'mohitkumar339900@gmail.com')
 
 # Resend HTTPS API email settings -- checked FIRST in feedback/services.py, ahead
 # of Brevo and SMTP. Works on Render's free tier since it uses HTTPS (443) rather
