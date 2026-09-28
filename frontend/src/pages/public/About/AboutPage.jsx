@@ -40,7 +40,7 @@ const AboutPage = () => {
     {
       name: 'MOHIT CHAUASIYA',
       role: 'TEAM MEMBER',
-      contribution: '-FRONTEND-DEVELOPER\n-OVERALL-TESTING',
+      contribution: '-FRONTEND-DEVELOPER\n-USER-AUTHENTICATION-SYSTEM\n-OVERALL-TESTING\n-HOSTING-AND-DEPLOYMENT',
       image: '/images/teams/mohit.png',
     },
     {
@@ -52,7 +52,7 @@ const AboutPage = () => {
     {
       name: 'TUSHAR RAWAT',
       role: 'TEAM MEMBER',
-      contribution: '-ML-MODEL-DEVELOPER',
+      contribution: '-MACHINE-LEARNING-MODEL-DEVELOPER',
       image: '/images/teams/Tushar.jpeg',
     },
     {
