@@ -125,14 +125,22 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Database Configuration (PostgreSQL only)
-# Reads DATABASE_URL from environment. Default points to local Docker PostgreSQL.
-DATABASES = {
-    'default': dj_database_url.config(
-        default='postgres://jeevansetu_dev:jeevansetu_pass@localhost:5433/jeevansetu',
-        conn_max_age=600,
-    )
-}
+import sys
+
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default='postgres://jeevansetu_dev:jeevansetu_pass@localhost:5433/jeevansetu',
+            conn_max_age=600,
+        )
+    }
 
 # Email Configuration (SMTP fallback -- blocked on Render free tier, kept for local/dev use)
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')

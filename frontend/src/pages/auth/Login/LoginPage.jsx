@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '../../../context/AuthContext';
 import { ROUTES } from '../../../constants/routes';
+import { getHomeRouteForUser } from '../../../utils/roleUtils';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -24,9 +25,9 @@ const LoginPage = () => {
     }
 
     try {
-      await login(username.trim(), password);
-
-      navigate(ROUTES.USER_DASHBOARD);
+      const currentUser = await login(username.trim(), password);
+      const targetRoute = getHomeRouteForUser(currentUser);
+      navigate(targetRoute, { replace: true });
     } catch (err) {
       const backendError = err.response?.data;
 

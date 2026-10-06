@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 
 import { AuthContext } from '../context/AuthContext';
 import { ROUTES } from '../constants/routes';
+import { isAdminRole } from '../utils/roleUtils';
 
 const RoleBasedRoute = ({ children }) => {
   const {
@@ -11,7 +12,6 @@ const RoleBasedRoute = ({ children }) => {
     loading,
   } = useContext(AuthContext);
 
-  // User information load hone tak wait karo
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -22,15 +22,12 @@ const RoleBasedRoute = ({ children }) => {
     );
   }
 
-  // User logged in nahi hai
   if (!isAuthenticated) {
-    return <Navigate to={ROUTES.ADMIN_LOGIN} replace />;
+    return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
   // Only ADMIN and SUPER_ADMIN can access admin routes
-  const allowedRoles = ['ADMIN', 'SUPER_ADMIN'];
-
-  if (!user || !allowedRoles.includes(user.role)) {
+  if (!isAdminRole(user)) {
     return <Navigate to={ROUTES.USER_DASHBOARD} replace />;
   }
 

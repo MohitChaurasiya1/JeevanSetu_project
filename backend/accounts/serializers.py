@@ -7,6 +7,15 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=False,
+        min_length=8,
+        allow_blank=True,
+        error_messages={'min_length': 'Password must be at least 8 characters long.'}
+    )
+    prediction_count = serializers.IntegerField(read_only=True, default=0)
+
     class Meta:
         model = User
         fields = [
@@ -20,17 +29,71 @@ class UserSerializer(serializers.ModelSerializer):
             'role',
             'is_email_verified',
             'is_active',
+            'password',
+            'prediction_count',
+            'last_login',
             'created_at',
             'updated_at',
         ]
         read_only_fields = [
             'id',
-            'role',
-            'is_email_verified',
-            'is_active',
             'created_at',
             'updated_at',
+            'prediction_count',
+            'last_login',
         ]
+
+    def to_internal_value(self, data):
+        if isinstance(data, dict):
+            data = data.copy()
+            if data.get('date_of_birth') == '':
+                data['date_of_birth'] = None
+            if data.get('phone') == '':
+                data['phone'] = None
+            if not data.get('gender'):
+                data['gender'] = 'OTHER'
+        return super().to_internal_value(data)
+
+    def validate_username(self, value):
+        username = (value or '').strip()
+        if not username:
+            raise serializers.ValidationError("Username is required.")
+        qs = User.objects.filter(username__iexact=username)
+        if self.instance:
+            qs = qs.exclude(id=self.instance.id)
+        if qs.exists():
+            raise serializers.ValidationError("A user with this username already exists.")
+        return username
+
+    def validate_email(self, value):
+        email = (value or '').strip()
+        if not email:
+            raise serializers.ValidationError("Email is required.")
+        qs = User.objects.filter(email__iexact=email)
+        if self.instance:
+            qs = qs.exclude(id=self.instance.id)
+        if qs.exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return email
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+        user.save()
+        return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
 
 
 class RegisterSerializer(serializers.ModelSerializer):

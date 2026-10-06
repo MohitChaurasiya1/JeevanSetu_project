@@ -12,34 +12,50 @@ from .services import (
     send_contact_received_notification,
     send_contact_response_email,
 )
-
-
-class IsAdminOrStaff(permissions.BasePermission):
-    """
-    Allows access only to authenticated admin users (is_staff, is_superuser, or role in ['ADMIN', 'SUPER_ADMIN']).
-    """
-    def has_permission(self, request, view):
-        user = request.user
-        return bool(
-            user
-            and user.is_authenticated
-            and (
-                user.is_staff
-                or user.is_superuser
-                or getattr(user, 'role', None) in ['ADMIN', 'SUPER_ADMIN']
-            )
-        )
+from core.permissions import IsAdminRole
 
 
 class FeedbackViewSet(viewsets.ModelViewSet):
+    queryset = Feedback.objects.all().select_related('user').order_by('-created_at')
     serializer_class = FeedbackSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        if self.request.user.is_staff:
-            return Feedback.objects.all()
+        user = self.request.user
+        if not user or not user.is_authenticated:
+            return Feedback.objects.none()
 
-        return Feedback.objects.filter(user=self.request.user)
+        is_admin = bool(
+            user.is_staff
+            or user.is_superuser
+            or getattr(user, 'role', None) in ['ADMIN', 'SUPER_ADMIN']
+        )
+        if is_admin:
+            queryset = Feedback.objects.all().select_related('user').order_by('-created_at')
+
+            status_param = self.request.query_params.get('status')
+            if status_param and status_param.upper() in ['PENDING', 'REVIEWED', 'RESOLVED']:
+                queryset = queryset.filter(status=status_param.upper())
+
+            rating_param = self.request.query_params.get('rating')
+            if rating_param and rating_param.isdigit():
+                queryset = queryset.filter(rating=int(rating_param))
+
+            search_param = self.request.query_params.get('search')
+            if search_param:
+                search_param = search_param.strip()
+                queryset = queryset.filter(
+                    models.Q(subject__icontains=search_param)
+                    | models.Q(message__icontains=search_param)
+                    | models.Q(admin_response__icontains=search_param)
+                    | models.Q(user__username__icontains=search_param)
+                    | models.Q(user__full_name__icontains=search_param)
+                    | models.Q(user__email__icontains=search_param)
+                )
+
+            return queryset
+
+        return Feedback.objects.filter(user=user).select_related('user').order_by('-created_at')
 
 
 class ContactMessageViewSet(viewsets.ModelViewSet):
@@ -53,7 +69,7 @@ class ContactMessageViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == 'create':
             return [permissions.AllowAny()]
-        return [IsAdminOrStaff()]
+        return [IsAdminRole()]
 
     def get_serializer_class(self):
         if self.action in ['update', 'partial_update', 'retrieve']:

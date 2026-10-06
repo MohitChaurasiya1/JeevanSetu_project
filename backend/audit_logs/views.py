@@ -4,23 +4,7 @@ from rest_framework.response import Response
 from django.db.models import Q
 from .models import AuditLog
 from .serializers import AuditLogSerializer
-
-
-class IsAdminOrStaff(permissions.BasePermission):
-    """
-    Allows access to admin users (role in ['ADMIN', 'SUPER_ADMIN'], is_staff, is_superuser).
-    """
-    def has_permission(self, request, view):
-        user = request.user
-        return bool(
-            user
-            and user.is_authenticated
-            and (
-                user.is_staff
-                or user.is_superuser
-                or getattr(user, 'role', None) in ['ADMIN', 'SUPER_ADMIN']
-            )
-        )
+from core.permissions import IsAdminRole
 
 
 class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
@@ -29,7 +13,7 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
     Supports filtering by ?action=LOGIN/REGISTER, ?status=SUCCESS/FAILED, ?username=..., ?search=...
     """
     serializer_class = AuditLogSerializer
-    permission_classes = [IsAdminOrStaff]
+    permission_classes = [IsAdminRole]
 
     def get_queryset(self):
         queryset = AuditLog.objects.all().select_related('user').order_by('-created_at')

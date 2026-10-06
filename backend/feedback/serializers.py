@@ -6,10 +6,33 @@ PHONE_REGEX = re.compile(r'^[+\d][\d\s\-().]{6,19}$')
 
 
 class FeedbackSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.full_name', read_only=True)
+    user_username = serializers.CharField(source='user.username', read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+
     class Meta:
         model = Feedback
-        fields = '__all__'
+        fields = [
+            'id',
+            'user',
+            'user_name',
+            'user_username',
+            'user_email',
+            'subject',
+            'message',
+            'rating',
+            'status',
+            'admin_response',
+            'created_at',
+            'updated_at',
+        ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def validate_status(self, value):
+        valid_statuses = [choice[0] for choice in Feedback.STATUS_CHOICES]
+        if value and value.upper() not in valid_statuses:
+            raise serializers.ValidationError(f"Invalid status. Choose from: {', '.join(valid_statuses)}")
+        return value.upper() if value else value
 
 
 class ContactMessageSerializer(serializers.ModelSerializer):
