@@ -78,20 +78,6 @@ const Navbar = () => {
               </NavLink>
             ))}
 
-            {isAuthenticated && (
-              <NavLink
-                to={homeDashboardRoute}
-                className={({ isActive }) =>
-                  `px-3 py-2 rounded-md text-sm font-medium nav-link-animated transition-colors duration-200 ${
-                    isActive
-                      ? 'text-primary bg-primary-light/30 font-semibold'
-                      : 'text-text-secondary hover:text-primary'
-                  }`
-                }
-              >
-                {isAdmin ? 'Admin Portal' : 'Dashboard'}
-              </NavLink>
-            )}
           </div>
 
           {/* Right Auth Action Buttons (Desktop) */}
