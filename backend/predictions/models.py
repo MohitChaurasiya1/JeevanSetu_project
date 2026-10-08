@@ -12,5 +12,9 @@ class Prediction(models.Model):
     model_version = models.CharField(max_length=50, default='1.0.0')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
         return f"Prediction #{self.id} for {self.user.username}"
+

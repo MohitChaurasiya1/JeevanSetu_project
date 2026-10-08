@@ -41,6 +41,7 @@ const AdminRoutes = () => (
     {/* Disease Management */}
     <Route path="diseases" element={<DiseaseManagementPage />} />
     <Route path="diseases/new" element={<DiseaseFormPage />} />
+    <Route path="diseases/:id/edit" element={<DiseaseFormPage />} />
 
     {/* Symptom Management */}
     <Route path="symptoms" element={<SymptomManagementPage />} />

@@ -11,69 +11,6 @@ import {
   ErrorState,
 } from '../../../components/common';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/**
- * Split a text field (e.g. precautions) that may contain comma-separated
- * or newline-separated entries into an array of non-empty trimmed strings.
- * Returns null when the field is absent or contains only whitespace.
- */
-const splitTextToList = (text) => {
-  if (!text || !text.trim()) return null;
-  // Try newline split first; fall back to comma split
-  const byNewline = text.split('\n').map((s) => s.trim()).filter(Boolean);
-  if (byNewline.length > 1) return byNewline;
-  const byComma = text.split(',').map((s) => s.trim()).filter(Boolean);
-  return byComma.length > 0 ? byComma : null;
-};
-
-/**
- * Detect whether the loaded disease is "Diabetes" (case-insensitive, partial match).
- * Used to conditionally show diabetes-specific educational content.
- */
-const isDiabetesDisease = (name) => {
-  if (!name) return false;
-  const lower = name.toLowerCase();
-  return lower.includes('diabetes');
-};
-
-// ─── Static educational content for Diabetes ─────────────────────────────────
-// These sections are NOT from the backend. They provide supplementary
-// informational content only when the disease is Diabetes.
-
-const DIABETES_SYMPTOMS = [
-  'Frequent urination',
-  'Increased thirst',
-  'Increased hunger',
-  'Unexplained weight loss',
-  'Fatigue',
-  'Blurred vision',
-  'Slow-healing wounds',
-];
-
-const DIABETES_RISK_FACTORS = [
-  { title: 'Age', description: 'Risk tends to increase with age, especially after 45 years.' },
-  { title: 'Family History', description: 'Having a close relative with diabetes may increase risk.' },
-  { title: 'Overweight / Obesity', description: 'Excess body weight is associated with higher risk.' },
-  { title: 'Physical Inactivity', description: 'A sedentary lifestyle may contribute to risk.' },
-  { title: 'Elevated Blood Glucose', description: 'Previously identified high blood sugar levels may indicate increased risk.' },
-  { title: 'High Blood Pressure', description: 'Hypertension is often associated with metabolic risk factors.' },
-];
-
-const DIABETES_DIAGNOSIS_TESTS = [
-  { name: 'Fasting Plasma Glucose', description: 'Measures blood sugar after an overnight fast.' },
-  { name: 'HbA1c (Glycated Hemoglobin)', description: 'Reflects average blood sugar over the past 2–3 months.' },
-  { name: 'Oral Glucose Tolerance Test', description: 'Measures blood sugar before and after consuming a glucose drink.' },
-];
-
-const DIABETES_PREVENTION_HABITS = [
-  'Maintain a balanced diet rich in whole grains and vegetables.',
-  'Engage in regular moderate physical activity.',
-  'Monitor blood glucose when medically advised.',
-  'Stay hydrated and limit sugary drinks and highly processed foods.',
-  'Attend routine health checkups and follow professional medical advice.',
-];
-
 // ─── Inline SVG Icons ────────────────────────────────────────────────────────
 
 const HeartPulseIcon = ({ className = 'w-5 h-5' }) => (
@@ -124,7 +61,43 @@ const BeakerIcon = ({ className = 'w-5 h-5' }) => (
   </svg>
 );
 
-// ─── Section components ────────────────────────────────────────────────────────
+const InfoIcon = ({ className = 'w-5 h-5' }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/**
+ * Parse a value that might be an array, comma-separated string, or newline-separated string
+ * into an array of non-empty trimmed strings.
+ */
+const toArray = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value.map((v) => (typeof v === 'object' ? v.title || JSON.stringify(v) : String(v))).filter(Boolean);
+  }
+  if (typeof value === 'string' && value.trim()) {
+    const byNewline = value.split('\n').map((s) => s.trim()).filter(Boolean);
+    if (byNewline.length > 1) return byNewline;
+    return value.split(',').map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+};
+
+/** True when the disease name includes "diabetes" (case-insensitive) */
+const isDiabetesDisease = (name) => (name || '').toLowerCase().includes('diabetes');
+
+// ─── Static diabetes-only CTA content (unchanged from original) ───────────────
+
+const DIABETES_DIAGNOSIS_TESTS = [
+  { name: 'Fasting Plasma Glucose', description: 'Measures blood sugar after an overnight fast.' },
+  { name: 'HbA1c (Glycated Hemoglobin)', description: 'Reflects average blood sugar over the past 2–3 months.' },
+  { name: 'Oral Glucose Tolerance Test', description: 'Measures blood sugar before and after consuming a glucose drink.' },
+];
+
+// ─── Section wrapper components ───────────────────────────────────────────────
 
 const SectionHeading = ({ icon, children }) => (
   <div className="flex items-center gap-2.5 mb-4">
@@ -140,9 +113,9 @@ const SectionHeading = ({ icon, children }) => (
   </div>
 );
 
-const InfoSection = ({ id, heading, icon, children, className = '' }) => (
+const InfoSection = ({ heading, icon, children, className = '' }) => (
   <section
-    aria-labelledby={id || `section-${heading.toLowerCase().replace(/\s+/g, '-')}`}
+    aria-labelledby={`section-${heading.toLowerCase().replace(/\s+/g, '-')}`}
     className={`mb-8 ${className}`}
   >
     <SectionHeading icon={icon}>{heading}</SectionHeading>
@@ -150,7 +123,56 @@ const InfoSection = ({ id, heading, icon, children, className = '' }) => (
   </section>
 );
 
-// ─── Main Page ─────────────────────────────────────────────────────────────────
+// ─── List rendering ───────────────────────────────────────────────────────────
+
+const BulletList = ({ items }) => (
+  <Card className="card-base">
+    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      {items.map((item, idx) => (
+        <li key={idx} className="flex items-start gap-2.5 text-sm text-text-secondary">
+          <span
+            aria-hidden="true"
+            className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"
+          />
+          <span className="leading-relaxed">{item}</span>
+        </li>
+      ))}
+    </ul>
+  </Card>
+);
+
+const CheckList = ({ items }) => (
+  <Card className="card-base">
+    <ul className="space-y-2.5">
+      {items.map((item, idx) => (
+        <li key={idx} className="flex items-start gap-2.5 text-sm text-text-secondary">
+          <CheckCircleIcon className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
+          <span className="leading-relaxed">{item}</span>
+        </li>
+      ))}
+    </ul>
+  </Card>
+);
+
+const NumberedCardList = ({ items }) => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    {items.map((item, idx) => (
+      <div key={idx} className="card-base p-4 flex items-start gap-3">
+        <div
+          aria-hidden="true"
+          className="mt-0.5 w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0"
+        >
+          <span className="text-amber-600 text-xs font-bold">{idx + 1}</span>
+        </div>
+        <div>
+          <p className="text-sm text-text-secondary leading-relaxed">{item}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 const DiseaseDetailsPage = () => {
   const navigate = useNavigate();
@@ -165,7 +187,6 @@ const DiseaseDetailsPage = () => {
     setLoading(true);
     setError(null);
     setNotFound(false);
-
     try {
       const data = await getDiseaseById(id);
       setDisease(data);
@@ -192,9 +213,7 @@ const DiseaseDetailsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const handleBackToDiseases = () => {
-    navigate(ROUTES.DISEASES);
-  };
+  const handleBackToDiseases = () => navigate(ROUTES.DISEASES);
 
   // ── Shared Back Button ──────────────────────────────────────────────────────
   const BackButton = () => (
@@ -204,20 +223,14 @@ const DiseaseDetailsPage = () => {
       className="inline-flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-primary mb-6 px-0"
       id="back-to-diseases-btn"
     >
-      <svg
-        className="w-4 h-4"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        aria-hidden="true"
-      >
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
       </svg>
       Back to Diseases
     </Button>
   );
 
-  // ── Loading ─────────────────────────────────────────────────────────────────
+  // ── Loading ──────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <main className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
@@ -230,7 +243,7 @@ const DiseaseDetailsPage = () => {
     );
   }
 
-  // ── Not Found ───────────────────────────────────────────────────────────────
+  // ── Not Found ────────────────────────────────────────────────────────────────
   if (notFound) {
     return (
       <main className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
@@ -249,7 +262,7 @@ const DiseaseDetailsPage = () => {
     );
   }
 
-  // ── API Error ───────────────────────────────────────────────────────────────
+  // ── API Error ────────────────────────────────────────────────────────────────
   if (error) {
     return (
       <main className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
@@ -270,16 +283,21 @@ const DiseaseDetailsPage = () => {
 
   if (!disease) return null;
 
-  // ── Parsed field values ─────────────────────────────────────────────────────
+  // ── Derived values ───────────────────────────────────────────────────────────
   const isDiabetes = isDiabetesDisease(disease.name);
-  const precautionsList = splitTextToList(disease.precautions);
-  const hasRiskMessage = disease.risk_message && disease.risk_message.trim();
-  const hasSpecialist = disease.recommended_specialist && disease.recommended_specialist.trim();
+  const hasSpecialist = disease.recommended_specialist?.trim();
 
-  // For Diabetes, use enriched prevention list; otherwise keep original precautions
-  const preventionList = isDiabetes ? DIABETES_PREVENTION_HABITS : precautionsList;
+  // Parse list fields
+  const symptomsList = toArray(disease.symptoms);
+  const causesList = toArray(disease.causes);
+  const riskFactorsList = toArray(disease.risk_factors);
+  const preventionList = toArray(disease.prevention);
+  const treatmentList = toArray(disease.treatment);
 
-  // ── Full Detail View ────────────────────────────────────────────────────────
+  // Determine overview text: prefer detailed_description, fallback to description
+  const overviewText = disease.detailed_description?.trim() || disease.description?.trim();
+
+  // ── Full Detail View ─────────────────────────────────────────────────────────
   return (
     <main className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
@@ -290,7 +308,6 @@ const DiseaseDetailsPage = () => {
         {/* ─── 2. Disease Header ───────────────────────────────────────── */}
         <header className="border-b border-border pb-6 mb-8">
           <div className="flex flex-wrap items-center gap-3 mb-2">
-            {/* Disease icon */}
             <div
               aria-hidden="true"
               className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0"
@@ -308,161 +325,116 @@ const DiseaseDetailsPage = () => {
               )}
             </div>
           </div>
+          {/* Short description in header if there's a separate detailed_description */}
+          {disease.detailed_description && disease.description && (
+            <p className="text-sm text-text-secondary mt-3 leading-relaxed">
+              {disease.description}
+            </p>
+          )}
         </header>
 
-        {/* ─── 3. Overview (What is Diabetes?) ─────────────────────────── */}
-        {disease.description && (
+        {/* ─── 3. Overview ─────────────────────────────────────────────── */}
+        {overviewText && (
           <InfoSection
-            heading={isDiabetes ? 'What is Diabetes?' : 'Overview'}
+            heading={isDiabetes ? 'What is Diabetes?' : `What is ${disease.name}?`}
             icon={<ClipboardIcon className="w-4 h-4" />}
           >
             <Card className="card-base">
               <p className="text-sm sm:text-base text-text-secondary leading-relaxed">
-                {disease.description}
+                {overviewText}
               </p>
             </Card>
           </InfoSection>
         )}
 
-        {/* ─── 4. Common Symptoms (Diabetes only) ──────────────────────── */}
-        {isDiabetes && (
+        {/* ─── 4. Common Symptoms ──────────────────────────────────────── */}
+        {symptomsList.length > 0 && (
           <InfoSection
             heading="Common Symptoms"
             icon={<ExclamationIcon className="w-4 h-4" />}
           >
-            <Card className="card-base">
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {DIABETES_SYMPTOMS.map((symptom, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-start gap-2.5 text-sm text-text-secondary"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0"
-                    />
-                    <span className="leading-relaxed">{symptom}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-4 text-xs text-text-muted italic">
-                Symptoms can vary between individuals, and some people may have no noticeable symptoms.
-              </p>
-            </Card>
+            <BulletList items={symptomsList} />
+            <p className="mt-3 text-xs text-text-muted italic">
+              Symptoms can vary between individuals. Some people may have no noticeable symptoms.
+            </p>
           </InfoSection>
         )}
 
-        {/* ─── 5. Common Risk Factors (Diabetes only) ──────────────────── */}
-        {isDiabetes && (
+        {/* ─── 5. Causes ───────────────────────────────────────────────── */}
+        {causesList.length > 0 && (
+          <InfoSection
+            heading="Causes"
+            icon={<BeakerIcon className="w-4 h-4" />}
+          >
+            <CheckList items={causesList} />
+          </InfoSection>
+        )}
+
+        {/* ─── 6. Risk Factors ─────────────────────────────────────────── */}
+        {riskFactorsList.length > 0 && (
           <InfoSection
             heading="Common Risk Factors"
             icon={<ShieldIcon className="w-4 h-4" />}
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {DIABETES_RISK_FACTORS.map((factor, idx) => (
-                <div
-                  key={idx}
-                  className="card-base p-4 flex items-start gap-3"
-                >
-                  <div
-                    aria-hidden="true"
-                    className="mt-0.5 w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0"
-                  >
-                    <span className="text-amber-600 text-xs font-bold">{idx + 1}</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-text">{factor.title}</p>
-                    <p className="text-xs text-text-muted mt-0.5 leading-relaxed">{factor.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <NumberedCardList items={riskFactorsList} />
           </InfoSection>
         )}
 
-        {/* ─── 6. How Diabetes is Diagnosed (Diabetes only) ────────────── */}
-        {isDiabetes && (
+        {/* ─── 7. Prevention ───────────────────────────────────────────── */}
+        {preventionList.length > 0 && (
           <InfoSection
-            heading="How is Diabetes Diagnosed?"
-            icon={<BeakerIcon className="w-4 h-4" />}
-          >
-            <Card className="card-base">
-              <p className="text-sm text-text-secondary leading-relaxed mb-4">
-                Healthcare professionals may use medical history review and laboratory tests to assess diabetes. Common diagnostic tests include:
-              </p>
-              <div className="space-y-3">
-                {DIABETES_DIAGNOSIS_TESTS.map((test, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-start gap-3 p-3 bg-background rounded-lg"
-                  >
-                    <CheckCircleIcon className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-text">{test.name}</p>
-                      <p className="text-xs text-text-muted mt-0.5">{test.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-xs text-blue-800 leading-relaxed">
-                  <strong>Note:</strong> JeevanSetu provides a risk assessment and does not diagnose diabetes. Always consult a qualified healthcare professional for diagnosis.
-                </p>
-              </div>
-            </Card>
-          </InfoSection>
-        )}
-
-        {/* ─── 7. Risk Information (from API) ──────────────────────────── */}
-        {hasRiskMessage && (
-          <InfoSection heading="Risk Information">
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <p className="text-sm text-amber-900 leading-relaxed">
-                {isDiabetes
-                  ? 'A higher predicted risk indicates that the input values are associated with a higher estimated risk according to the machine-learning model. This result is not a diagnosis. Please consult a healthcare professional for clinical evaluation.'
-                  : disease.risk_message
-                }
-              </p>
-            </div>
-          </InfoSection>
-        )}
-
-        {/* ─── 8. Prevention & Healthy Habits ──────────────────────────── */}
-        {preventionList && preventionList.length > 0 && (
-          <InfoSection
-            heading={isDiabetes ? 'Prevention & Healthy Habits' : 'Precautions'}
+            heading="Prevention & Healthy Habits"
             icon={<ShieldIcon className="w-4 h-4" />}
           >
-            <Card className="card-base">
-              <ul className="space-y-2.5">
-                {preventionList.map((item, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-start gap-2.5 text-sm text-text-secondary"
-                  >
-                    <CheckCircleIcon className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
-                    <span className="leading-relaxed">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
+            <CheckList items={preventionList} />
           </InfoSection>
         )}
 
-        {/* ─── 9. When to Consult a Doctor (Diabetes only) ─────────────── */}
-        {isDiabetes && (
-          <InfoSection heading="When should you seek medical advice?">
+        {/* ─── 8. Treatment / Management ───────────────────────────────── */}
+        {treatmentList.length > 0 && (
+          <InfoSection
+            heading="Treatment / Management"
+            icon={<CheckCircleIcon className="w-4 h-4" />}
+          >
+            <CheckList items={treatmentList} />
+          </InfoSection>
+        )}
+
+        {/* ─── 9. When to See a Doctor ─────────────────────────────────── */}
+        {disease.when_to_see_doctor?.trim() && (
+          <InfoSection heading="When to See a Doctor">
             <Card className="card-base">
               <p className="text-sm text-text-secondary leading-relaxed">
-                Consider speaking with a healthcare professional if you have persistent symptoms,
-                abnormal blood glucose results, or concerns about your diabetes risk. Early consultation
-                can help in understanding your health better and planning appropriate next steps.
+                {disease.when_to_see_doctor}
               </p>
             </Card>
           </InfoSection>
         )}
 
-        {/* ─── 10. Recommended Specialist ──────────────────────────────── */}
+        {/* ─── 10. Additional Information ──────────────────────────────── */}
+        {disease.additional_info?.trim() && (
+          <InfoSection
+            heading="Additional Information"
+            icon={<InfoIcon className="w-4 h-4" />}
+          >
+            <div className="p-4 bg-slate-50 border border-border rounded-lg">
+              <p className="text-sm text-text-secondary leading-relaxed">
+                {disease.additional_info}
+              </p>
+            </div>
+          </InfoSection>
+        )}
+
+        {/* ─── Legacy: risk_message (if no new fields present) ─────────── */}
+        {!symptomsList.length && !causesList.length && disease.risk_message?.trim() && (
+          <InfoSection heading="Risk Information">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <p className="text-sm text-amber-900 leading-relaxed">{disease.risk_message}</p>
+            </div>
+          </InfoSection>
+        )}
+
+        {/* ─── 11. Recommended Specialist ──────────────────────────────── */}
         {hasSpecialist && (
           <InfoSection heading="Recommended Specialist">
             <div className="flex items-center gap-3 p-4 bg-surface border border-border rounded-lg">
@@ -482,25 +454,43 @@ const DiseaseDetailsPage = () => {
           </InfoSection>
         )}
 
-        {/* No additional info available notice (non-diabetes diseases with no data) */}
-        {!isDiabetes && !hasRiskMessage && !precautionsList && !hasSpecialist && (
-          <div className="mb-8 p-4 rounded-lg bg-slate-50 border border-border text-center">
-            <p className="text-sm text-text-muted">
-              No additional information is currently available for this disease.
-            </p>
-          </div>
+        {/* ─── 12. Diabetes-specific: How is it Diagnosed? ─────────────── */}
+        {isDiabetes && (
+          <InfoSection
+            heading="How is Diabetes Diagnosed?"
+            icon={<BeakerIcon className="w-4 h-4" />}
+          >
+            <Card className="card-base">
+              <p className="text-sm text-text-secondary leading-relaxed mb-4">
+                Healthcare professionals may use medical history review and laboratory tests to assess diabetes. Common diagnostic tests include:
+              </p>
+              <div className="space-y-3">
+                {DIABETES_DIAGNOSIS_TESTS.map((test, idx) => (
+                  <div key={idx} className="flex items-start gap-3 p-3 bg-background rounded-lg">
+                    <CheckCircleIcon className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-text">{test.name}</p>
+                      <p className="text-xs text-text-muted mt-0.5">{test.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-800 leading-relaxed">
+                  <strong>Note:</strong> JeevanSetu provides a risk assessment and does not diagnose diabetes. Always consult a qualified healthcare professional for diagnosis.
+                </p>
+              </div>
+            </Card>
+          </InfoSection>
         )}
 
-        {/* ─── 11. Check Diabetes Risk CTA ─────────────────────────────── */}
+        {/* ─── 13. Diabetes risk CTA ───────────────────────────────────── */}
         {isDiabetes && (
           <div className="mb-8">
             <Card className="card-base text-center py-6 px-4 sm:px-8">
-              <h3 className="text-lg font-bold text-text mb-2">
-                Assess Your Diabetes Risk
-              </h3>
+              <h3 className="text-lg font-bold text-text mb-2">Assess Your Diabetes Risk</h3>
               <p className="text-sm text-text-secondary mb-5 max-w-md mx-auto">
-                Use JeevanSetu's risk assessment tool to get an estimated risk score
-                based on your health information.
+                Use JeevanSetu's risk assessment tool to get an estimated risk score based on your health information.
               </p>
               <Link to={ROUTES.NEW_PREDICTION}>
                 <Button
@@ -516,7 +506,18 @@ const DiseaseDetailsPage = () => {
           </div>
         )}
 
-        {/* ─── 12. Medical Disclaimer ──────────────────────────────────── */}
+        {/* ─── 14. No info available notice ─────────────────────────────── */}
+        {!overviewText && !symptomsList.length && !causesList.length &&
+          !riskFactorsList.length && !preventionList.length && !treatmentList.length &&
+          !disease.when_to_see_doctor && !disease.additional_info && !disease.risk_message && (
+          <div className="mb-8 p-4 rounded-lg bg-slate-50 border border-border text-center">
+            <p className="text-sm text-text-muted">
+              No additional information is currently available for this disease.
+            </p>
+          </div>
+        )}
+
+        {/* ─── 15. Medical Disclaimer ──────────────────────────────────── */}
         <div className="mb-8">
           <Alert
             variant="warning"
@@ -524,7 +525,7 @@ const DiseaseDetailsPage = () => {
           />
         </div>
 
-        {/* ─── 13. Bottom Back Button ──────────────────────────────────── */}
+        {/* ─── 16. Bottom Back Button ──────────────────────────────────── */}
         <div className="pt-4 border-t border-border">
           <Button
             variant="outline"
@@ -532,13 +533,7 @@ const DiseaseDetailsPage = () => {
             id="back-to-diseases-bottom-btn"
             className="inline-flex items-center gap-2"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
             </svg>
             Back to Diseases
