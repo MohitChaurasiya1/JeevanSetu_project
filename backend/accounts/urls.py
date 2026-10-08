@@ -7,6 +7,7 @@ from .views import (
     RegisterAPIView,
     MeAPIView,
     CustomTokenObtainPairView,
+    LogoutAPIView,
 )
 
 router = DefaultRouter()
@@ -23,5 +24,6 @@ urlpatterns = [
 
     # JWT Authentication (Username OR Email login)
     path('login/', CustomTokenObtainPairView.as_view(), name='login'),
+    path('logout/', LogoutAPIView.as_view(), name='logout'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

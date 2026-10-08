@@ -196,3 +196,21 @@ class MeAPIView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class LogoutAPIView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        log_audit_event(
+            user=user,
+            username=user.username,
+            action='LOGOUT',
+            status='SUCCESS',
+            module='AUTH',
+            record_id=str(user.id),
+            description=f"User '{user.username}' ({user.role}) logged out",
+            request=request,
+        )
+        return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)

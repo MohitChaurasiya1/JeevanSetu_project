@@ -14,6 +14,9 @@ import {
   FiClock,
   FiCheckCircle,
   FiXCircle,
+  FiLogIn,
+  FiLogOut,
+  FiGlobe,
 } from 'react-icons/fi';
 import {
   Button,
@@ -24,7 +27,7 @@ import {
   Modal,
 } from '../../../components/common';
 import ConfirmDialog from '../../../components/modals/ConfirmDialog';
-import { getUserById, updateUser, deleteUser, getAdminPredictions } from '../../../api/adminApi';
+import { getUserById, updateUser, deleteUser, getAdminPredictions, getAuditLogs } from '../../../api/adminApi';
 import { AuthContext } from '../../../context/AuthContext';
 import { ROUTES } from '../../../constants/routes';
 
@@ -61,6 +64,7 @@ const UserDetailsPage = () => {
 
   const [user, setUser] = useState(null);
   const [predictions, setPredictions] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [feedback, setFeedback] = useState(null);
@@ -105,6 +109,14 @@ const UserDetailsPage = () => {
         setPredictions(predData.results || predData || []);
       } catch (predErr) {
         console.warn('Could not load user predictions:', predErr);
+      }
+
+      // Load user's audit / login / logout history
+      try {
+        const auditData = await getAuditLogs({ user_id: id });
+        setAuditLogs(auditData.results || auditData || []);
+      } catch (auditErr) {
+        console.warn('Could not load user audit logs:', auditErr);
       }
     } catch (err) {
       console.error('Failed to load user details:', err);
@@ -511,6 +523,86 @@ const UserDetailsPage = () => {
                           View
                         </Button>
                       </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ── User Activity & Login / Logout History Section ──────── */}
+      <div className="bg-white rounded-2xl border border-border shadow-card p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-text">Login, Logout & Activity History</h2>
+            <p className="text-xs text-textSecondary mt-0.5">
+              Real-time audit record of all logins, logouts, predictions, and account actions.
+            </p>
+          </div>
+          {auditLogs.length > 0 && (
+            <Link
+              to={`/admin/activity-logs?username=${user.username}`}
+              className="text-xs font-semibold text-primary hover:underline"
+            >
+              View in Activity Logs ↗
+            </Link>
+          )}
+        </div>
+
+        {auditLogs.length === 0 ? (
+          <div className="p-8 text-center bg-slate-50 rounded-xl border border-border">
+            <FiClock className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="text-sm font-semibold text-text">No activity records logged</p>
+            <p className="text-xs text-textSecondary mt-0.5">
+              Activity history is automatically captured when this user logs in, logs out, or runs predictions.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto border border-border rounded-xl">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 border-b border-border text-xs uppercase font-semibold text-textSecondary">
+                <tr>
+                  <th className="py-3 px-4">Action</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Description</th>
+                  <th className="py-3 px-4">IP Address</th>
+                  <th className="py-3 px-4">Date & Time</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {auditLogs.slice(0, 10).map((log) => (
+                  <tr key={log.id} className="hover:bg-slate-50/75 transition-colors">
+                    <td className="py-3 px-4">
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                        log.action === 'LOGIN'
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                          : log.action === 'LOGOUT'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : log.action === 'REGISTER'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-slate-100 text-slate-700 border border-slate-200'
+                      }`}>
+                        {log.action === 'LOGIN' && <FiLogIn className="w-3.5 h-3.5" />}
+                        {log.action === 'LOGOUT' && <FiLogOut className="w-3.5 h-3.5" />}
+                        {log.action === 'REGISTER' && <FiCheckCircle className="w-3.5 h-3.5" />}
+                        {log.action}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <Badge variant={log.status === 'SUCCESS' ? 'success' : 'danger'}>
+                        {log.status}
+                      </Badge>
+                    </td>
+                    <td className="py-3 px-4 text-text text-xs max-w-xs truncate" title={log.description}>
+                      {log.description || '--'}
+                    </td>
+                    <td className="py-3 px-4 text-xs font-mono text-textSecondary">
+                      {log.ip_address || '--'}
+                    </td>
+                    <td className="py-3 px-4 text-xs text-textSecondary whitespace-nowrap">
+                      {log.created_at ? new Date(log.created_at).toLocaleString() : '--'}
                     </td>
                   </tr>
                 ))}

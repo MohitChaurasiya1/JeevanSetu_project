@@ -12,6 +12,7 @@ import {
   FiUserCheck,
   FiUserX,
   FiActivity,
+  FiClock,
 } from 'react-icons/fi';
 import {
   Button,
@@ -127,7 +128,7 @@ const UserListPage = () => {
       console.error('Failed to load users:', err);
       setError(
         err.response?.data?.detail ||
-          'Failed to load user records. Please verify administrator permissions.'
+        'Failed to load user records. Please verify administrator permissions.'
       );
     } finally {
       setLoading(false);
@@ -245,10 +246,11 @@ const UserListPage = () => {
 
         <div className="flex items-center gap-3 self-start sm:self-auto">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={loadUsers}
             disabled={loading}
             icon={<FiRefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />}
+            className="inline-flex items-center justify-center gap-1 px-3"
           >
             Refresh
           </Button>
@@ -257,6 +259,7 @@ const UserListPage = () => {
             variant="primary"
             onClick={() => navigate(ROUTES.ADMIN_USER_FORM)}
             icon={<FiUserPlus className="w-4 h-4" />}
+            className="inline-flex items-center justify-center gap-1 px-3"
           >
             Add User
           </Button>
@@ -406,6 +409,7 @@ const UserListPage = () => {
                   <th className="py-3.5 px-4">Status</th>
                   <th className="py-3.5 px-4 text-center">Verified</th>
                   <th className="py-3.5 px-4 text-center">Predictions</th>
+                  <th className="py-3.5 px-4">Last Login</th>
                   <th className="py-3.5 px-4">Joined Date</th>
                   <th className="py-3.5 px-5 text-right">Actions</th>
                 </tr>
@@ -451,16 +455,14 @@ const UserListPage = () => {
                       {/* Status Badge */}
                       <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            u.is_active
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : 'bg-red-50 text-red-700 border border-red-200'
-                          }`}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${u.is_active
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-red-50 text-red-700 border border-red-200'
+                            }`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              u.is_active ? 'bg-emerald-500' : 'bg-red-500'
-                            }`}
+                            className={`w-1.5 h-1.5 rounded-full ${u.is_active ? 'bg-emerald-500' : 'bg-red-500'
+                              }`}
                           />
                           {u.is_active ? 'Active' : 'Inactive'}
                         </span>
@@ -493,14 +495,31 @@ const UserListPage = () => {
                         </span>
                       </td>
 
+                      {/* Last Login */}
+                      <td className="py-3.5 px-4 text-xs text-textSecondary whitespace-nowrap">
+                        {u.last_login ? (
+                          <span className="inline-flex items-center gap-1 font-medium text-slate-700">
+                            <FiClock className="w-3 h-3 text-emerald-600" />
+                            {new Date(u.last_login).toLocaleDateString(undefined, {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 italic">Never</span>
+                        )}
+                      </td>
+
                       {/* Joined Date */}
                       <td className="py-3.5 px-4 text-xs text-textSecondary whitespace-nowrap">
                         {u.created_at
                           ? new Date(u.created_at).toLocaleDateString(undefined, {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                            })
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })
                           : '--'}
                       </td>
 
@@ -515,20 +534,29 @@ const UserListPage = () => {
                             size="sm"
                             className="text-xs px-2.5 py-1"
                             onClick={() => navigate(`/admin/users/${u.id}`)}
-                            title="View user details"
+                            title="View user details & activity history"
                           >
                             <FiEye className="w-3.5 h-3.5" />
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs px-2 py-1 text-blue-600 hover:bg-blue-50"
+                            onClick={() => navigate(`/admin/activity-logs?username=${u.username}`)}
+                            title="View all Login / Logout Activity Logs"
+                          >
+                            <FiClock className="w-3.5 h-3.5" />
                           </Button>
 
                           {!isCurrent && (
                             <Button
                               variant="ghost"
                               size="sm"
-                              className={`text-xs px-2 py-1 ${
-                                u.is_active
-                                  ? 'text-amber-600 hover:bg-amber-50'
-                                  : 'text-emerald-600 hover:bg-emerald-50'
-                              }`}
+                              className={`text-xs px-2 py-1 ${u.is_active
+                                ? 'text-amber-600 hover:bg-amber-50'
+                                : 'text-emerald-600 hover:bg-emerald-50'
+                                }`}
                               onClick={(e) => handleToggleStatus(u, e)}
                               disabled={actionLoading}
                               title={u.is_active ? 'Deactivate User' : 'Activate User'}
@@ -598,11 +626,10 @@ const UserListPage = () => {
                   <div className="flex items-center justify-between text-xs text-textSecondary pt-1 border-t border-slate-100">
                     <div className="flex items-center gap-3">
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${
-                          u.is_active
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-red-50 text-red-700'
-                        }`}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium ${u.is_active
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-red-50 text-red-700'
+                          }`}
                       >
                         {u.is_active ? 'Active' : 'Inactive'}
                       </span>

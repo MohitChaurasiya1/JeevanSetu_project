@@ -155,11 +155,12 @@ const AdminDashboardPage = () => {
 
         <div className="flex items-center gap-3 self-start sm:self-auto">
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={fetchDashboardData}
             disabled={loading}
             icon={<FiRefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />}
+            className="inline-flex items-center justify-center gap-1 px-3"
           >
             Refresh
           </Button>
@@ -509,11 +510,10 @@ const AdminDashboardPage = () => {
                           {/* Status Dot */}
                           <div className="pt-1 sm:pt-0">
                             <span
-                              className={`block w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                                isSuccess
-                                  ? 'bg-emerald-500 ring-4 ring-emerald-100'
-                                  : 'bg-red-500 ring-4 ring-red-100'
-                              }`}
+                              className={`block w-2.5 h-2.5 rounded-full flex-shrink-0 ${isSuccess
+                                ? 'bg-emerald-500 ring-4 ring-emerald-100'
+                                : 'bg-red-500 ring-4 ring-red-100'
+                                }`}
                               title={`Status: ${log.status}`}
                             />
                           </div>

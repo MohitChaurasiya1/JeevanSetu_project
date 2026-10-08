@@ -87,7 +87,7 @@ const ContactMessageListPage = () => {
       console.error('Failed to load contact messages:', err);
       setError(
         err.response?.data?.detail ||
-          'Failed to load contact messages. Please verify admin permissions.'
+        'Failed to load contact messages. Please verify admin permissions.'
       );
     } finally {
       setLoading(false);
@@ -167,10 +167,11 @@ const ContactMessageListPage = () => {
 
         <div className="flex items-center gap-3">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={loadMessages}
             disabled={loading}
-            className="flex items-center gap-2"
+            className="inline-flex items-center justify-center gap-1 px-3"
+
           >
             <svg
               className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
@@ -202,11 +203,10 @@ const ContactMessageListPage = () => {
                 setStatusFilter(f.value);
                 setCurrentPage(1);
               }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
-                statusFilter === f.value
-                  ? 'bg-primary text-white shadow-xs'
-                  : 'bg-slate-100 text-text-secondary hover:bg-slate-200 hover:text-text'
-              }`}
+              className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-colors ${statusFilter === f.value
+                ? 'bg-primary text-white shadow-xs'
+                : 'bg-slate-100 text-text-secondary hover:bg-slate-200 hover:text-text'
+                }`}
             >
               {f.label}
             </button>
@@ -334,12 +334,12 @@ const ContactMessageListPage = () => {
                     <td className="py-3.5 px-4 hidden md:table-cell text-xs text-text-secondary whitespace-nowrap">
                       {msg.created_at
                         ? new Date(msg.created_at).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
                         : 'N/A'}
                     </td>
 

@@ -19,9 +19,15 @@ const login = async (username, password) => {
     return data;
 };
 
-const logout = () => {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+const logout = async () => {
+    try {
+        await authApi.logout();
+    } catch (e) {
+        // Continue even if backend call fails
+    } finally {
+        localStorage.removeItem(ACCESS_TOKEN_KEY);
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
 };
 
 const getAccessToken = () => {

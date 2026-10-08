@@ -57,9 +57,8 @@ const RenderStars = ({ rating = 5 }) => {
       {[1, 2, 3, 4, 5].map((star) => (
         <FiStar
           key={star}
-          className={`w-3.5 h-3.5 ${
-            star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'
-          }`}
+          className={`w-3.5 h-3.5 ${star <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'
+            }`}
         />
       ))}
       <span className="ml-1 text-xs font-semibold text-text">{rating}</span>
@@ -125,7 +124,7 @@ const FeedbackManagementPage = () => {
       console.error('Failed to load feedback:', err);
       setError(
         err.response?.data?.detail ||
-          'Failed to load feedback submissions. Please check administrator permissions.'
+        'Failed to load feedback submissions. Please check administrator permissions.'
       );
     } finally {
       setLoading(false);
@@ -213,10 +212,11 @@ const FeedbackManagementPage = () => {
 
         <div className="flex items-center gap-3 self-start sm:self-auto">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={loadFeedbacks}
             disabled={loading}
             icon={<FiRefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />}
+            className="inline-flex items-center justify-center gap-1 px-3"
           >
             Refresh
           </Button>
@@ -270,11 +270,10 @@ const FeedbackManagementPage = () => {
                   setStatusFilter(f.value);
                   setCurrentPage(1);
                 }}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                  statusFilter === f.value
-                    ? 'bg-white text-text font-semibold shadow-xs'
-                    : 'text-textSecondary hover:text-text'
-                }`}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${statusFilter === f.value
+                  ? 'bg-white text-text font-semibold shadow-xs'
+                  : 'text-textSecondary hover:text-text'
+                  }`}
               >
                 {f.label}
               </button>
@@ -429,10 +428,10 @@ const FeedbackManagementPage = () => {
                     <td className="py-3.5 px-4 text-xs text-textSecondary whitespace-nowrap">
                       {f.created_at
                         ? new Date(f.created_at).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })
                         : '--'}
                     </td>
 

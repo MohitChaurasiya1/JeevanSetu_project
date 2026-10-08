@@ -26,9 +26,19 @@ const getCurrentUser = async () => {
     return response.data;
 };
 
+const logout = async () => {
+    try {
+        const response = await axiosInstance.post('/auth/logout/');
+        return response.data;
+    } catch (e) {
+        return null;
+    }
+};
+
 const authApi = {
     register,
     login,
+    logout,
     refreshToken,
     getCurrentUser,
 };

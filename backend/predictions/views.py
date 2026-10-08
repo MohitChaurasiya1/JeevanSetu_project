@@ -11,6 +11,9 @@ from diseases.models import Disease
 from core.authentication import OptionalJWTAuthentication
 
 
+from audit_logs.services import log_audit_event
+
+
 class PredictionViewSet(viewsets.ModelViewSet):
     serializer_class = PredictionSerializer
     authentication_classes = [OptionalJWTAuthentication]
@@ -66,6 +69,18 @@ class PredictionViewSet(viewsets.ModelViewSet):
                 probability=result.get("probability", 0.0),
                 risk_level=result.get("risk_level", "LOW"),
                 model_version="1.0.0"
+            )
+
+            # Log audit event
+            log_audit_event(
+                user=request.user,
+                username=request.user.username,
+                action='OTHER',
+                status='SUCCESS',
+                module='PREDICTIONS',
+                record_id=str(prediction.id),
+                description=f"Prediction generated: {result.get('risk', 'Unknown')} (Risk: {result.get('risk_level', 'LOW')})",
+                request=request,
             )
 
             # Return the database ID so frontend can

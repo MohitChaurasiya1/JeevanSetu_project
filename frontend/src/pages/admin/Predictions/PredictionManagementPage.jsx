@@ -121,7 +121,7 @@ const PredictionManagementPage = () => {
       console.error('Failed to load predictions:', err);
       setError(
         err.response?.data?.detail ||
-          'Failed to load prediction records. Please verify administrator permissions.'
+        'Failed to load prediction records. Please verify administrator permissions.'
       );
     } finally {
       setLoading(false);
@@ -260,10 +260,11 @@ const PredictionManagementPage = () => {
 
         <div className="flex items-center gap-3 self-start sm:self-auto">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={loadPredictions}
             disabled={loading}
             icon={<FiRefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />}
+            className="inline-flex items-center justify-center gap-1 px-3"
           >
             Refresh
           </Button>
@@ -274,6 +275,7 @@ const PredictionManagementPage = () => {
             loading={exportLoading}
             disabled={loading || exportLoading}
             icon={<FiDownload className="w-4 h-4" />}
+            className="inline-flex items-center justify-center gap-1 px-3"
           >
             Export CSV
           </Button>
@@ -502,10 +504,10 @@ const PredictionManagementPage = () => {
                       <td className="py-3.5 px-4 text-xs text-textSecondary whitespace-nowrap">
                         {p.created_at
                           ? new Date(p.created_at).toLocaleDateString(undefined, {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                            })
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })
                           : '--'}
                       </td>
 
