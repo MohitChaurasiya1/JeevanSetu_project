@@ -150,7 +150,7 @@ const ContactMessageListPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* ── Page Header ────────────────────────────────────────── */}
       <div className="bg-white rounded-2xl border border-border shadow-card p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -282,12 +282,12 @@ const ContactMessageListPage = () => {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 border-b border-border text-xs uppercase font-semibold text-text-secondary">
                 <tr>
-                  <th className="py-3.5 px-4 sm:px-6">Sender</th>
-                  <th className="py-3.5 px-4 hidden sm:table-cell">Contact</th>
-                  <th className="py-3.5 px-4">Message Preview</th>
-                  <th className="py-3.5 px-4">Status</th>
-                  <th className="py-3.5 px-4 hidden md:table-cell">Date</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
+                  <th className="py-3 px-3 sm:px-4">Sender</th>
+                  <th className="py-3 px-3 sm:px-4 hidden sm:table-cell">Contact</th>
+                  <th className="py-3 px-3 sm:px-4">Message Preview</th>
+                  <th className="py-3 px-3 sm:px-4">Status</th>
+                  <th className="py-3 px-3 sm:px-4 hidden md:table-cell">Date</th>
+                  <th className="py-3 px-3 sm:px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -298,23 +298,23 @@ const ContactMessageListPage = () => {
                     className="hover:bg-slate-50/75 cursor-pointer transition-colors"
                   >
                     {/* Sender Name */}
-                    <td className="py-3.5 px-4 sm:px-6">
-                      <div className="font-semibold text-text">{msg.full_name}</div>
-                      <div className="text-xs text-text-secondary sm:hidden">
+                    <td className="py-3 px-3 sm:px-4">
+                      <div className="font-semibold text-text truncate max-w-[140px] sm:max-w-none">{msg.full_name}</div>
+                      <div className="text-xs text-text-secondary sm:hidden truncate max-w-[140px]">
                         {msg.email}
                       </div>
                     </td>
 
                     {/* Email / Phone */}
-                    <td className="py-3.5 px-4 hidden sm:table-cell">
-                      <div className="text-text">{msg.email}</div>
+                    <td className="py-3 px-3 sm:px-4 hidden sm:table-cell">
+                      <div className="text-text truncate max-w-[180px]">{msg.email}</div>
                       {msg.phone && (
                         <div className="text-xs text-text-secondary">{msg.phone}</div>
                       )}
                     </td>
 
                     {/* Message Preview */}
-                    <td className="py-3.5 px-4 max-w-xs md:max-w-md">
+                    <td className="py-3 px-3 sm:px-4 max-w-[180px] md:max-w-xs lg:max-w-sm">
                       <p className="text-text truncate">{msg.message}</p>
                       {msg.admin_response && (
                         <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 font-medium mt-0.5">
@@ -324,14 +324,14 @@ const ContactMessageListPage = () => {
                     </td>
 
                     {/* Status Badge */}
-                    <td className="py-3.5 px-4">
+                    <td className="py-3 px-3 sm:px-4">
                       <Badge variant={getStatusBadgeVariant(msg.status)}>
                         {msg.status}
                       </Badge>
                     </td>
 
                     {/* Created Date */}
-                    <td className="py-3.5 px-4 hidden md:table-cell text-xs text-text-secondary whitespace-nowrap">
+                    <td className="py-3 px-3 sm:px-4 hidden md:table-cell text-xs text-text-secondary whitespace-nowrap">
                       {msg.created_at
                         ? new Date(msg.created_at).toLocaleDateString(undefined, {
                           year: 'numeric',
@@ -345,13 +345,13 @@ const ContactMessageListPage = () => {
 
                     {/* Action Buttons */}
                     <td
-                      className="py-3.5 px-4 text-right whitespace-nowrap"
+                      className="py-3 px-3 sm:px-4 text-right whitespace-nowrap"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1.5">
                         <Button
                           variant="outline"
-                          className="text-xs px-2.5 py-1"
+                          className="text-xs px-2 py-1 h-7"
                           onClick={() => openMessageModal(msg)}
                         >
                           Details
@@ -360,7 +360,7 @@ const ContactMessageListPage = () => {
                         {msg.status === 'NEW' && (
                           <Button
                             variant="secondary"
-                            className="text-xs px-2.5 py-1"
+                            className="text-xs px-2 py-1 h-7"
                             onClick={(e) => handleQuickStatusUpdate(msg.id, 'READ', e)}
                           >
                             Mark Read
@@ -370,7 +370,7 @@ const ContactMessageListPage = () => {
                         {msg.status !== 'RESOLVED' && (
                           <Button
                             variant="primary"
-                            className="text-xs px-2.5 py-1"
+                            className="text-xs px-2 py-1 h-7"
                             onClick={(e) =>
                               handleQuickStatusUpdate(msg.id, 'RESOLVED', e)
                             }
