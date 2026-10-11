@@ -45,7 +45,8 @@ class PredictionViewSet(viewsets.ModelViewSet):
 
         # Run ML prediction
         try:
-            result = DiseasePredictor.predict(features)
+            target_disease = features.get('disease', 'Diabetes')
+            result = DiseasePredictor.predict(features, disease=target_disease)
 
         except Exception as e:
             return Response(
@@ -57,9 +58,12 @@ class PredictionViewSet(viewsets.ModelViewSet):
 
         # Save prediction for authenticated users
         if request.user and request.user.is_authenticated:
-            disease_obj = Disease.objects.filter(
-                name__iexact='Diabetes'
-            ).first()
+            disease_name = result.get("disease", "Diabetes")
+            disease_obj = Disease.objects.filter(name__iexact=disease_name).first()
+            if not disease_obj:
+                disease_obj = Disease.objects.filter(
+                    name__icontains="Heart" if "heart" in disease_name.lower() else "Diabetes"
+                ).first()
 
             prediction = Prediction.objects.create(
                 user=request.user,
@@ -68,7 +72,7 @@ class PredictionViewSet(viewsets.ModelViewSet):
                 prediction_result=result.get("risk"),
                 probability=result.get("probability", 0.0),
                 risk_level=result.get("risk_level", "LOW"),
-                model_version="1.0.0"
+                model_version="2.0.0"
             )
 
             # Log audit event

@@ -88,8 +88,8 @@ const HomePage = () => {
       ),
       title: 'Heart Disease',
       description:
-        'Future assessment for potential heart disease risk based on relevant health parameters.',
-      available: false,
+        'AI assessment for potential cardiovascular risk based on clinical symptoms and vital health parameters.',
+      available: true,
     },
     {
       icon: (
