@@ -51,7 +51,7 @@ const Button = ({
       type={type}
       disabled={disabled || loading}
       onClick={handleClick}
-      className={`btn-ripple-container ${selectedVariant} ${className}`}
+      className={`btn-base btn-ripple-container ${selectedVariant} ${className}`}
       {...props}
     >
       {/* Ripple Animation Spans */}
@@ -72,7 +72,7 @@ const Button = ({
       {loading ? (
         <>
           <svg
-            className="animate-spin -ml-1 mr-2 h-4 w-4 text-current"
+            className="animate-spin -ml-1 mr-2 h-4 w-4 text-current flex-shrink-0"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -96,7 +96,7 @@ const Button = ({
         </>
       ) : (
         <>
-          {icon && <span className="mr-2 inline-flex items-center">{icon}</span>}
+          {icon && <span className="inline-flex items-center flex-shrink-0">{icon}</span>}
           {children}
         </>
       )}
